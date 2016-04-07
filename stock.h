@@ -1,31 +1,31 @@
-#define STOCK_H
 #ifndef STOCK_H
+#define STOCK_H
 
-#include string
-
+#include <string>
+using namespace std;
 
 class stock{
 
 	public:
-		stock(int, int, string);
-		int get_bete();
-		int get_price();
+		stock(double, double, string);
+		double get_beta();
+		double get_price();
 		string get_stockName();
 
 
 
 	private:
-		int beta;
-		int stock_price;
+		double beta;
+		double stock_price;
 		string stock_name;
 };
 
 
-stock::stock(int b, int price, string name){
+stock::stock(double b, double price, string name){
 
 	beta = b;
 	stock_price = price;
-	stock_name = name;
+	//stock_name = name;
 
 }
 

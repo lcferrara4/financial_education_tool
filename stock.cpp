@@ -2,7 +2,7 @@
 #include <string>
 using namespace std;
 
-stock::stock(int b, int price, string name){
+stock::stock(double b, double price, string name){
 
 	beta = b;
 	stock_price = price;
@@ -10,12 +10,12 @@ stock::stock(int b, int price, string name){
 
 }
 
-int stock::get_beta(){
+double stock::get_beta(){
 
 	return beta;
 }
 
-int stock::get_price(){
+double stock::get_price(){
 
 	return stock_price;
 }

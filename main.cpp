@@ -1,5 +1,6 @@
 #include <iostream>
 #include <random>
+#include <string>
 #include "stock.h"
 using namespace std;
 
@@ -7,9 +8,9 @@ int main(){
 
 	cout << "Here" << endl;
 
-	int array[90];
-
 	stock test(1.0, 20.0, "test");
+
+	cout << test.get_beta() << endl;
 
 	
 
