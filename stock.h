@@ -20,13 +20,4 @@ class stock{
 		string stock_name;
 };
 
-
-stock::stock(double b, double price, string name){
-
-	beta = b;
-	stock_price = price;
-	//stock_name = name;
-
-}
-
 #endif
