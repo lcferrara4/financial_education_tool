@@ -1,33 +1,27 @@
 #include <iostream>
 #include <random>
 #include <string>
+#include <ctime>
+#include <time.h>
+#include <unistd.h>
+#include <vector>
+#include <fstream>
 #include "stock.h"
 using namespace std;
 
 int main(){
+	//instatniate
+	default_random_engine generator(time(0));
+	vector<stock> stocks;
 
-	cout << "Here" << endl;
-
-	stock test(1.0, 20.0, "test");
-
-	cout << test.get_beta() << endl;
-
-	
-
-    
-	/*default_random_engine generator;
-	normal_distribution<double> distribution(50.0,25.0);
-
-	int p[200]={};
-
-	for(int i=0; i<5000; i++){
-		double number = distribution(generator);
-		++p[int(number)+50];
+	for(int j=0;j<60;j++){
+		stock s (10.0,50.0,"Alumni Hall", generator);
+		stocks.push_back(s);
 	}
 
-	for(int i=0;i<200;i++){
-		cout << i-50 << "-" << (i-50+1) << ": ";
-		cout << std::string(p[i],'*') << endl;
-	}*/
-
+	for(int i=0;i<60;i++){
+		stocks[i].recalc_price();
+		cout << stocks[i].get_price() << endl;
+		cout << "Stock number" << i << endl;
+	}
 }
