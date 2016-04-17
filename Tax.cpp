@@ -11,9 +11,9 @@
 #include "Tax.h"
 
 using namespace std; 
-Tax::Tax(){
+Tax::Tax(double mortDeductions, double studentDeductions){
 
-	Mortgage myMort;  
+	  deductions = mortDeductions + studentDeductions; 
 
     int count=0; 
     string word, line; 
@@ -166,12 +166,12 @@ void Tax::calcItax(){
 
 
     //CALCULATE INCOME TAX 
-    getDeductions(); 
+    
     double taxable = income - deductions; 
 
     taxAmount = taxable -taxable*stateRate - taxable*fedRate; 
 
-
+    cout<<income<<" is your income, your tax rate is: "<<endl; 
 
 }
 
@@ -185,11 +185,13 @@ string Tax::clean(string state){
     return state; 
 }
 
+/*
 void Tax::getDeductions(){
 
     
-    if (User.myMort->getTax()){ //bool returns whether or not loan is tax deductible 
-        deductions+=User.myMort->getPrinc(); 
+    if (myMort.getTax()){ //bool returns whether or not loan is tax deductible 
+        deductions+=myMort.getPrinc(); 
     }
 
 }
+*/

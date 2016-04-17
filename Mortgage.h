@@ -5,7 +5,7 @@
 #include <vector>
 
 
-
+class Tax; 
 class Mortgage : public Loan{
 
     friend ostream &operator<<(ostream&, const Mortgage &M); 

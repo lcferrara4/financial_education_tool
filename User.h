@@ -6,14 +6,19 @@ class Mortgage;
 class Tax; 
 
 class User{
+
+    friend class Tax; 
     public: 
         User(); 
-        ~User(); 
-        Student *getStudent(); 
-        Mortgage *getMortgage(); 
-        Tax *getTax();     
+       // ~User();
+        Student makeStudent(); 
+        Mortgage makeMortgage(); 
+        Tax makeTax(double, double); 
+        Student getStudent(); 
+        Mortgage getMortgage(); 
+        Tax getTax();     
     private: 
-        Mortgage *myMort;
-        Tax *myTax;
-        Student *myStu; 
+        //Mortgage myMort;
+        //Tax myTax(double, double);
+        //Student myStu; 
 };

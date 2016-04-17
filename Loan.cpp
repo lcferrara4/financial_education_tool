@@ -5,7 +5,7 @@
 using namespace std; 
 
 Loan::Loan(){
-/*
+
     double rate, princ, months; 
     bool tax; 
     
@@ -22,7 +22,7 @@ Loan::Loan(){
     setTax(tax); 
     setMonths(months); 
     setPrinc(princ); 
-*/
+
      
 
 }
