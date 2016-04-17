@@ -1,0 +1,15 @@
+#include <iostream> 
+#include "User.h"
+#include "Loan.h"
+#include "Tax.h"
+#include "Mortgage.h"
+
+
+User::User(){
+
+	Mortgage myMort(.45,1,10000,7; 
+	myMort.amortize();     
+    	Tax myTax(myMort); 
+	myTax.calcItax(); 
+
+}

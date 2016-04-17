@@ -1,0 +1,11 @@
+#include "Tax.h"
+using namespace std; 
+
+class User{
+    public: 
+        User(); 
+    private: 
+        Loan userLoan; 
+        Mortgage myMort;
+        Tax userTax(myMort);
+};

@@ -1,0 +1,22 @@
+#ifndef MORTGAGE_H
+#define MORTGAGE_H
+
+#include <iostream>
+#include <vector>
+#include "Loan.h" 
+
+
+class Mortgage : public Loan{
+
+    friend ostream &operator<<(ostream&, const Mortgage &M); 
+
+    public:
+        Mortgage();
+        Mortgage(double, bool, double, double); 
+        void credit(double); 
+        void amortize(); 
+    private:
+        vector<vector<double> > table; 
+}; 
+
+#endif

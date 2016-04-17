@@ -1,0 +1,11 @@
+main: main2.o Tax.o
+	g++ main2.o Tax.o -o main
+
+main2.o: main2.cpp
+	g++ -c main2.cpp
+
+Tax.o: Tax.cpp Loan.cpp
+	g++ -c Tax.cpp Loan.cpp 
+
+clean:
+	rm -f *.o main

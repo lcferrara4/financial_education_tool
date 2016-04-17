@@ -1,0 +1,24 @@
+#include <iostream>
+#include "Loan.h"
+#include "Mortgage.h"
+#include "Student.h"
+#include "User.h"
+#include "Tax.h"
+
+using namespace std; 
+
+int main(){
+
+    //Mortgage myMort(1,1,2000,15); 
+
+    //myMort.amortize();
+    //cout<<myMort; 
+    User myUser; 
+    
+    //Student myStu; 
+   // myStu.createPlan(); 
+    //cout<<myStu;
+
+    Tax myTax; 
+    myTax.calcItax(); 
+}
