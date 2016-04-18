@@ -114,17 +114,31 @@ LTexture gButtonSpriteSheetTexture;
 //Buttons objects
 LButton gButtons[ TOTAL_BUTTONS ];
 
-//Rendered textures
+//Menu Rendered textures
 LTexture mainTextTexture;
 LTexture taxTextTexture;
 LTexture loanTextTexture;
 LTexture stockTextTexture;
 LTexture plannerTextTexture;
+
+//Home Screen Rendered Textures
 LTexture welcomeTextTexture;
+
+//Loan Screen Rendered Textures
 LTexture taxScreenTextTexture;
-LTexture loanScreenTextTexture;
+
+//Stock Screen Rendered Textures
 LTexture stockScreenTextTexture;
+
+//Loan Screen Rendered Textures
+LTexture loanScreenTextTexture;
+LTexture gPromptTextTexture;
+LTexture gInputTextTexture;
+
+//Planner Screen Rendered Textures
 LTexture plannerScreenTextTexture;
+
+
 
 LTexture::LTexture()
 {
@@ -560,51 +574,121 @@ int main( int argc, char* args[] )
 					{
 						quit = true;
 					}
+/*                                        //Special key input
+                                        else if( e.type == SDL_KEYDOWN )
+                                        {
+                                                //Handle backspace
+                                                if( e.key.keysym.sym == SDLK_BACKSPACE && inputText.length() > 0 )
+                                                {
+                                                        //lop off character
+                                                        inputText = inputText.substr(0, inputText.size() - 1);
+                                                        renderText = true;
+                                                }
+                                                //Handle copy
+                                                else if( e.key.keysym.sym == SDLK_c && SDL_GetModState() & KMOD_CTRL )
+                                                {
+                                                        SDL_SetClipboardText( inputText.c_str() );
+                                                }
+                                                //Handle paste
+                                                else if( e.key.keysym.sym == SDLK_v && SDL_GetModState() & KMOD_CTRL )
+                                                {
+                                                        inputText = SDL_GetClipboardText();
+                                                        renderText = true;
+                                                }
+                                        }
+                                        //Special text input event
+                                        else if( e.type == SDL_TEXTINPUT )
+                                        {
+                                                //Not copy or pasting
+                                                if( !( ( e.text.text[ 0 ] == 'c' || e.text.text[ 0 ] == 'C' ) && ( e.text.text[ 0 ] == 'v' || e.text.text[ 0 ] == 'V' ) && SDL_GetModState() & KMOD_CTRL ) )
+                                                {
+                                                        //Append character
+                                                        inputText += e.text.text;
+                                                        renderText = true;
+                                                }
+                                        }
+                                }
 
+                                //Rerender text if needed
+                                if( renderText )
+                                {
+                                        //Text is not empty
+                                        if( inputText != "" )
+                                        {
+                                                //Render new text
+                                                gInputTextTexture.loadFromRenderedText( inputText.c_str(), textColor );
+                                        }
+                                        //Text is empty
+                                        else
+                                        {
+                                                //Render space texture
+                                                gInputTextTexture.loadFromRenderedText( " ", textColor );
+                                        }
+                                }
+
+                                //Clear screen
+                                SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
+                                SDL_RenderClear( gRenderer );
+
+                                //Render text textures
+                                gPromptTextTexture.render( ( SCREEN_WIDTH - gPromptTextTexture.getWidth() ) / 2, 0 );
+                                gInputTextTexture.render( ( SCREEN_WIDTH - gInputTextTexture.getWidth() ) / 2, gPromptTextTexture.getHeight() );
+
+                                //Update screen
+                                SDL_RenderPresent( gRenderer );
+                        }
+
+                        //Disable text input
+                        SDL_StopTextInput();
+                }
+*/
                                         //Handle button events
                                         for( int i = 0; i < TOTAL_BUTTONS; ++i )
                                         {
                                                 if( gButtons[ i ].handleEvent( &e ) )
+						{
 							currentScreen = i;
-                                       	}
+                                		}
+				      	}
 				}		
 		
-					//Clear screen
-					SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0xFF );
-					SDL_RenderClear( gRenderer );
+				//Clear screen
+				SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0xFF );
+				SDL_RenderClear( gRenderer );
 
-                                        //Render white filled rect
-                                        SDL_Rect mainRect = { 0, 0, BUTTON_WIDTH, BUTTON_HEIGHT };
-                                        SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
-                                        SDL_RenderFillRect( gRenderer, &mainRect );
+                                //Render white filled rect
+                                SDL_Rect mainRect = { 0, 0, BUTTON_WIDTH, BUTTON_HEIGHT };
+                                SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
+                                SDL_RenderFillRect( gRenderer, &mainRect );
 
-					//Render green filled rect
-					SDL_Rect taxRect = { 0, BUTTON_HEIGHT, BUTTON_WIDTH, BUTTON_HEIGHT };
-					SDL_SetRenderDrawColor( gRenderer, 0x00, 0xFF, 0x00, 0xFF );		
-					SDL_RenderFillRect( gRenderer, &taxRect );
+				//Render green filled rect
+				SDL_Rect taxRect = { 0, BUTTON_HEIGHT, BUTTON_WIDTH, BUTTON_HEIGHT };
+				SDL_SetRenderDrawColor( gRenderer, 0x00, 0xFF, 0x00, 0xFF );		
+				SDL_RenderFillRect( gRenderer, &taxRect );
 
-					//Render blue filled quad
-                                	SDL_Rect stockRect = { 0, BUTTON_HEIGHT * 2, BUTTON_WIDTH, BUTTON_HEIGHT };
-                                	SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0xFF, 0xFF );
-                                	SDL_RenderFillRect( gRenderer, &stockRect );
+				//Render blue filled quad
+                                SDL_Rect stockRect = { 0, BUTTON_HEIGHT * 2, BUTTON_WIDTH, BUTTON_HEIGHT };
+                                SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0xFF, 0xFF );
+                                SDL_RenderFillRect( gRenderer, &stockRect );
 	
-					//Render yellow filled quad
-					SDL_Rect loanRect = { 0, BUTTON_HEIGHT * 3, BUTTON_WIDTH, BUTTON_HEIGHT };
-                               	 	SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0x00, 0xFF );
-                                	SDL_RenderFillRect( gRenderer, &loanRect );
+				//Render yellow filled quad
+				SDL_Rect loanRect = { 0, BUTTON_HEIGHT * 3, BUTTON_WIDTH, BUTTON_HEIGHT };
+                               	SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0x00, 0xFF );
+                                SDL_RenderFillRect( gRenderer, &loanRect );
                                 
-					//Render light blue filled quad
-					SDL_Rect planRect = { 0, BUTTON_HEIGHT * 4, BUTTON_WIDTH, BUTTON_HEIGHT };
-					SDL_SetRenderDrawColor( gRenderer, 0x00, 0xFF, 0xFF, 0xFF );		
-					SDL_RenderFillRect( gRenderer, &planRect );
+				//Render light blue filled quad
+				SDL_Rect planRect = { 0, BUTTON_HEIGHT * 4, BUTTON_WIDTH, BUTTON_HEIGHT };
+				SDL_SetRenderDrawColor( gRenderer, 0x00, 0xFF, 0xFF, 0xFF );		
+				SDL_RenderFillRect( gRenderer, &planRect );
 			
-					//Render current frame
-					mainTextTexture.render( SCREEN_WIDTH / 10 - mainTextTexture.getWidth() ,  SCREEN_HEIGHT / 8 - mainTextTexture.getHeight() );
-                                	taxTextTexture.render( SCREEN_WIDTH / 10 - taxTextTexture.getWidth() , 2  * SCREEN_HEIGHT / 8 - taxTextTexture.getHeight() );
-                                	stockTextTexture.render( SCREEN_WIDTH / 10 - stockTextTexture.getWidth(), 3 * SCREEN_HEIGHT / 8 - stockTextTexture.getHeight() );
-					loanTextTexture.render( SCREEN_WIDTH / 10 - loanTextTexture.getWidth(), 4 * SCREEN_HEIGHT / 8 - loanTextTexture.getHeight() );
-					plannerTextTexture.render( SCREEN_WIDTH / 10 - plannerTextTexture.getWidth(), 5 * SCREEN_HEIGHT / 8 - plannerTextTexture.getHeight() );
+				//Render current frame
+				mainTextTexture.render( SCREEN_WIDTH / 10 - mainTextTexture.getWidth() ,  SCREEN_HEIGHT / 8 - mainTextTexture.getHeight() );
+                                taxTextTexture.render( SCREEN_WIDTH / 10 - taxTextTexture.getWidth() , 2  * SCREEN_HEIGHT / 8 - taxTextTexture.getHeight() );
+                                stockTextTexture.render( SCREEN_WIDTH / 10 - stockTextTexture.getWidth(), 3 * SCREEN_HEIGHT / 8 - stockTextTexture.getHeight() );
+				loanTextTexture.render( SCREEN_WIDTH / 10 - loanTextTexture.getWidth(), 4 * SCREEN_HEIGHT / 8 - loanTextTexture.getHeight() );
+				plannerTextTexture.render( SCREEN_WIDTH / 10 - plannerTextTexture.getWidth(), 5 * SCREEN_HEIGHT / 8 - plannerTextTexture.getHeight() );
 				
+				//Display chosen screen
 				if( currentScreen == 0 ){
 					welcomeTextTexture.render( SCREEN_WIDTH / 2 - welcomeTextTexture.getWidth() / 2 ,  SCREEN_HEIGHT / 2 - welcomeTextTexture.getHeight() / 2 );
 				}
@@ -620,9 +704,9 @@ int main( int argc, char* args[] )
 				{
                                         loanScreenTextTexture.render( SCREEN_WIDTH / 2 - loanScreenTextTexture.getWidth() / 2 , 0 );
 				}
-				else
+				else if( currentScreen == 4 )
 				{
-                                        plannerScreenTextTexture.render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+                                	plannerScreenTextTexture.render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
 				}
 				
 				//Update screen
