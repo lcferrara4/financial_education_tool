@@ -6,6 +6,8 @@
 #include <string>
 #include <cmath>
 
+using namespace std;
+
 //Screen dimension constants
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
@@ -14,8 +16,6 @@ const int SCREEN_HEIGHT = 480;
 const int BUTTON_WIDTH = SCREEN_WIDTH / 8;
 const int BUTTON_HEIGHT = SCREEN_HEIGHT / 8;
 const int TOTAL_BUTTONS = 5;
-
-int currentScreen = 0;
 
 class LTexture
 {
@@ -126,6 +126,8 @@ LTexture welcomeTextTexture;
 
 //Loan Screen Rendered Textures
 LTexture taxScreenTextTexture;
+LTexture taxPromptTextTexture;
+LTexture taxInputTextTexture;
 
 //Stock Screen Rendered Textures
 LTexture stockScreenTextTexture;
@@ -134,6 +136,8 @@ LTexture stockScreenTextTexture;
 LTexture loanScreenTextTexture;
 LTexture gPromptTextTexture;
 LTexture gInputTextTexture;
+LTexture monthPromptTextTexture;
+LTexture monthInputTextTexture;
 
 //Planner Screen Rendered Textures
 LTexture plannerScreenTextTexture;
@@ -290,7 +294,6 @@ LButton::LButton()
         mPosition.x = 0;
         mPosition.y = 0;
  
-//        mCurrentSprite = BUTTON_SPRITE_MOUSE_OUT;
 }
 
 void LButton::setPosition( int x, int y )
@@ -336,23 +339,10 @@ int LButton::handleEvent( SDL_Event* e )
                 if( inside )
                 {
 			return 1;
-/*
-                	// eventually clear window, display different object
-		        SDL_Rect fillRect = { mPosition.x, mPosition.y, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 };
-                       	SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0xFF );
-                        SDL_RenderFillRect( gRenderer, &fillRect );
-			SDL_RenderPresent( gRenderer );
-*/
 		}
 		return 0;
         }
 }
-
-//void LButton::render()
-//{
-//        //Show current button sprite
-//        gButtonSpriteSheetTexture.render( mPosition.x, mPosition.y, &gSpriteClips[ mCurrentSprite ] );
-//}
 
 
 bool init()
@@ -505,7 +495,25 @@ bool loadMedia()
                         success = false;
                 }
 
-       }
+                if( !gPromptTextTexture.loadFromRenderedText( "Enter Text:", textColor ) )
+                {
+                        printf( "Failed to render prompt text!\n" );
+                        success = false;
+                }
+                if( !monthPromptTextTexture.loadFromRenderedText( "Enter Months:", textColor ) )
+                {
+                        printf( "Failed to render prompt text!\n" );
+                        success = false;
+                }
+                if( !taxPromptTextTexture.loadFromRenderedText( "Tax Text:", textColor ) )
+                {
+                        printf( "Failed to render prompt text!\n" );
+                        success = false;
+                }
+        }
+
+
+
 
         return success;
 }
@@ -524,6 +532,14 @@ void close()
         stockScreenTextTexture.free();
         plannerScreenTextTexture.free();
 
+	gPromptTextTexture.free();
+	gInputTextTexture.free();
+
+        monthPromptTextTexture.free();
+        monthInputTextTexture.free();
+	
+	taxPromptTextTexture.free();
+	taxInputTextTexture.free();
 
         //Free global font
         TTF_CloseFont( gFont );
@@ -543,6 +559,8 @@ void close()
 
 int main( int argc, char* args[] )
 {
+	int currentScreen = 0;
+
 	//Start up SDL and create window
 	if( !init() )
 	{
@@ -557,15 +575,39 @@ int main( int argc, char* args[] )
 		}
 		else
 		{	
-			//Main loop flag
-			bool quit = false;
 
-			//Event handler
-			SDL_Event e;
+                        //Main loop flag
+                        bool quit = false;
+
+                        //Event handler
+                        SDL_Event e;
+
+                        //Set text color as black
+                        SDL_Color textColor = { 0, 250, 250, 0xFF };
+
+                        //The current input text.
+                        std::string inputText = "Principal";
+                        gInputTextTexture.loadFromRenderedText( inputText.c_str(), textColor );
+
+                        std::string monthText = "Months";
+                        monthInputTextTexture.loadFromRenderedText( monthText.c_str(), textColor );
+ 		
+			std::string taxText = "Income";
+			taxInputTextTexture.loadFromRenderedText( taxText.c_str(), textColor );                       
+
+                        //Enable text input
+                        SDL_StartTextInput();
+
+                	int x, y;
 
 			//While application is running
 			while( !quit )
 			{
+
+				bool renderText = false;
+				bool renderMonthText = false;
+				bool renderTaxText = false;
+	
 				//Handle events on queue
 				while( SDL_PollEvent( &e ) != 0 )
 				{
@@ -574,26 +616,67 @@ int main( int argc, char* args[] )
 					{
 						quit = true;
 					}
-/*                                        //Special key input
+
+        				//If mouse event happened
+        				else if( e.type == SDL_MOUSEBUTTONDOWN )
+        				{
+                				//Get mouse position
+                				SDL_GetMouseState( &x, &y );
+					}
+
+                                       	//Special key input
                                         else if( e.type == SDL_KEYDOWN )
                                         {
                                                 //Handle backspace
-                                                if( e.key.keysym.sym == SDLK_BACKSPACE && inputText.length() > 0 )
+                                                if( e.key.keysym.sym == SDLK_BACKSPACE )
                                                 {
-                                                        //lop off character
-                                                        inputText = inputText.substr(0, inputText.size() - 1);
-                                                        renderText = true;
+							if( taxText.length() > 0 && currentScreen == 1 ){
+                                                                taxText = taxText.substr(0, taxText.size() - 1);
+                                                                renderTaxText = true;
+							}
+                                                        //lop off character - loan screen
+                                                        else if( currentScreen == 3 ){
+								if( inputText.length() > 0 && y < 150 ){
+                                                        		inputText = inputText.substr(0, inputText.size() - 1);
+                                                        		renderText = true;
+								}
+								if( monthText.length() > 0 && y >= 150 ){
+                                                                        monthText = monthText.substr(0, monthText.size() - 1);
+                                                                        renderMonthText = true;
+								}
+							}
                                                 }
                                                 //Handle copy
                                                 else if( e.key.keysym.sym == SDLK_c && SDL_GetModState() & KMOD_CTRL )
                                                 {
-                                                        SDL_SetClipboardText( inputText.c_str() );
-                                                }
+							if( currentScreen == 1 ){
+                                                                SDL_SetClipboardText( taxText.c_str() );
+
+							}
+							else if( currentScreen == 3 ){
+								if( y < 150 )
+                                                        		SDL_SetClipboardText( inputText.c_str() );
+                                                		else
+									SDL_SetClipboardText( monthText.c_str() );
+							}
+						}
                                                 //Handle paste
                                                 else if( e.key.keysym.sym == SDLK_v && SDL_GetModState() & KMOD_CTRL )
                                                 {
-                                                        inputText = SDL_GetClipboardText();
-                                                        renderText = true;
+							if( currentScreen == 1 ){
+                                                                taxText = SDL_GetClipboardText();
+                                                                renderTaxText = true;
+							}
+							else if( currentScreen == 3 ){
+								if( y < 150 ){
+                                                        		inputText = SDL_GetClipboardText();
+                                                        		renderText = true;
+								}
+								else{
+                                                                        monthText = SDL_GetClipboardText();
+                                                                        renderMonthText = true;
+								}
+							}
                                                 }
                                         }
                                         //Special text input event
@@ -602,56 +685,85 @@ int main( int argc, char* args[] )
                                                 //Not copy or pasting
                                                 if( !( ( e.text.text[ 0 ] == 'c' || e.text.text[ 0 ] == 'C' ) && ( e.text.text[ 0 ] == 'v' || e.text.text[ 0 ] == 'V' ) && SDL_GetModState() & KMOD_CTRL ) )
                                                 {
-                                                        //Append character
-                                                        inputText += e.text.text;
-                                                        renderText = true;
+							if( currentScreen == 1 ){
+                                                                taxText += e.text.text;
+                                                                renderTaxText = true;
+							}
+							else if( currentScreen == 3 ){
+                                                        	//Append character
+								if( y < 150 ){
+                                                        		inputText += e.text.text;
+                                                        		renderText = true;
+								}
+								else{
+                                                                        monthText += e.text.text;
+                                                                        renderMonthText = true;
+								}
+							}
                                                 }
                                         }
-                                }
+				
+					//Handle button events
+                                        for( int i = 0; i < TOTAL_BUTTONS; ++i )
+                                        {
+                                        	int check = gButtons[ i ].handleEvent( &e );
+				      		if( check == 1 )
+							currentScreen = i;
+					}
+				}	
 
-                                //Rerender text if needed
-                                if( renderText )
+			      	//Rerender text if needed
+			      	if( renderText )
+			      	{
+					//Text is not empty 
+					if( inputText != "" )
+					{
+						//Render new text
+						gInputTextTexture.loadFromRenderedText( inputText.c_str(), textColor );
+					}
+					//Text is empty
+					else
+					{
+						//Render space texture
+						gInputTextTexture.loadFromRenderedText( " ", textColor );
+					}
+				}     	
+
+                                //Rerender month text if needed
+                                if( renderMonthText )
                                 {
-                                        //Text is not empty
-                                        if( inputText != "" )
+                                        //Text is not empty 
+                                        if( monthText != "" )
                                         {
                                                 //Render new text
-                                                gInputTextTexture.loadFromRenderedText( inputText.c_str(), textColor );
+                                                monthInputTextTexture.loadFromRenderedText( monthText.c_str(), textColor );
                                         }
                                         //Text is empty
                                         else
                                         {
                                                 //Render space texture
-                                                gInputTextTexture.loadFromRenderedText( " ", textColor );
+                                                monthInputTextTexture.loadFromRenderedText( " ", textColor );
                                         }
                                 }
 
-                                //Clear screen
-                                SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
-                                SDL_RenderClear( gRenderer );
-
-                                //Render text textures
-                                gPromptTextTexture.render( ( SCREEN_WIDTH - gPromptTextTexture.getWidth() ) / 2, 0 );
-                                gInputTextTexture.render( ( SCREEN_WIDTH - gInputTextTexture.getWidth() ) / 2, gPromptTextTexture.getHeight() );
-
-                                //Update screen
-                                SDL_RenderPresent( gRenderer );
-                        }
-
-                        //Disable text input
-                        SDL_StopTextInput();
-                }
-*/
-                                        //Handle button events
-                                        for( int i = 0; i < TOTAL_BUTTONS; ++i )
+                                //Rerender tax text if needed
+                                if( renderTaxText )
+                                {
+                                        //Text is not empty 
+                                        if( taxText != "" )
                                         {
-                                                if( gButtons[ i ].handleEvent( &e ) )
-						{
-							currentScreen = i;
-                                		}
-				      	}
-				}		
-		
+                                                //Render new text
+                                                taxInputTextTexture.loadFromRenderedText( taxText.c_str(), textColor );
+                                        }
+                                        //Text is empty
+                                        else
+                                        {
+                                                //Render space texture
+                                                taxInputTextTexture.loadFromRenderedText( " ", textColor );
+                                        }
+                                } 
+
+
 				//Clear screen
 				SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0xFF );
 				SDL_RenderClear( gRenderer );
@@ -691,10 +803,14 @@ int main( int argc, char* args[] )
 				//Display chosen screen
 				if( currentScreen == 0 ){
 					welcomeTextTexture.render( SCREEN_WIDTH / 2 - welcomeTextTexture.getWidth() / 2 ,  SCREEN_HEIGHT / 2 - welcomeTextTexture.getHeight() / 2 );
+					currentScreen = 0;
 				}
 				else if( currentScreen == 1 )
 				{
                                         taxScreenTextTexture.render( SCREEN_WIDTH / 2 - taxScreenTextTexture.getWidth() / 2 ,  0 );
+                                        //Render text textures
+                                        taxPromptTextTexture.render( ( SCREEN_WIDTH - taxPromptTextTexture.getWidth() ) / 2, 100 );
+                                        taxInputTextTexture.render( ( SCREEN_WIDTH - taxInputTextTexture.getWidth() ) / 2, 100 + taxPromptTextTexture.getHeight() );
 				}	
 				else if( currentScreen == 2 )
 				{
@@ -703,6 +819,14 @@ int main( int argc, char* args[] )
 				else if( currentScreen == 3 )
 				{
                                         loanScreenTextTexture.render( SCREEN_WIDTH / 2 - loanScreenTextTexture.getWidth() / 2 , 0 );
+
+					//Render text textures
+					gPromptTextTexture.render( ( SCREEN_WIDTH - gPromptTextTexture.getWidth() ) / 2, 100 );
+					gInputTextTexture.render( ( SCREEN_WIDTH - gInputTextTexture.getWidth() ) / 2, 100 + gPromptTextTexture.getHeight() );
+
+                                        monthPromptTextTexture.render( ( SCREEN_WIDTH - monthPromptTextTexture.getWidth() ) / 2, 200 );
+                                        monthInputTextTexture.render( ( SCREEN_WIDTH - monthInputTextTexture.getWidth() ) / 2, 200 + monthPromptTextTexture.getHeight() );
+
 				}
 				else if( currentScreen == 4 )
 				{
@@ -711,7 +835,12 @@ int main( int argc, char* args[] )
 				
 				//Update screen
 				SDL_RenderPresent( gRenderer );
+                        
 			}
+                        
+			//Disable text input
+                        SDL_StopTextInput();
+
 		}
 	}
 
