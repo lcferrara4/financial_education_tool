@@ -20,7 +20,7 @@ Tax.o: Tax.cpp
 	g++ -c Tax.cpp
 
 stock.o: stock.cpp
-	g++ -c stock.cpp
+	g++ -std=c++11 -c stock.cpp
 
 clean:
 	rm -f *.o main
