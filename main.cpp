@@ -9,19 +9,120 @@
 #include "stock.h"
 using namespace std;
 
+double makeSP(vector<stock>);
+
 int main(){
 	//instatniate
 	default_random_engine generator(time(0));
 	vector<stock> stocks;
+	vector<string> stock_Names;
 
-	for(int j=0;j<60;j++){
-		stock s (10.0,50.0,"Alumni Hall", generator);
-		stocks.push_back(s);
+	string in;
+	string response, buy_stock;
+	double SP, stock_buy =0, stock_sell =0;
+
+	// read in the stock names
+	string stock_names_file = "stock_names.txt";
+	ifstream myfile;
+	myfile.open(stock_names_file.c_str());
+	if (myfile.is_open()){
+		while(getline (myfile,in)){
+			stock_Names.push_back(in);
+		}
+		myfile.close();
 	}
 
+	// generates the stocks 
+	int change =0;
+	for(int j=0;j<60;j++){
+		if(change < 20){
+			stock s (7.5,50.0, stock_Names[j],"High Volatility", generator);
+			stocks.push_back(s);
+		} else if(change < 40){
+			stock s (5.0,50.0, stock_Names[j], "Medium Volatility", generator);
+			stocks.push_back(s);
+		} else if(change < 60){
+			stock s (2.5,50.0, stock_Names[j], "Low Volatility" ,generator);
+			stocks.push_back(s);
+		}
+		change++;
+	}
+
+	// displays the stocks
 	for(int i=0;i<60;i++){
 		stocks[i].recalc_price();
-		cout << stocks[i].get_price() << endl;
-		cout << "Stock number" << i << endl;
+		cout << stocks[i].get_stockName() << " " <<stocks[i].get_price() << ' ' <<endl;
+	}
+
+	// Make S&P 500
+	SP = makeSP(stocks);
+	cout << "S&P 500 " << SP << endl;
+
+	
+	//usleep(10000);
+
+	cout << "Do you want to buy a stock?" << endl << "Y for yes, N for no." << endl;
+	cin >> response;
+
+	if (response == "y" || response == "Y"){
+		cout << "What stock would you like to buy? It must match exactly." << endl;
+		cin >> buy_stock;
+	}else if( response == "n" || response == "N"){
+
+	}else{
+		cout << "Sorry that is not a correct response" << endl;
+	}
+	for(int i=0;i<60;i++){
+		// cout << stock_Names[i] << " " << buy_stock << endl;
+		if(stock_Names[i] == buy_stock){
+			cout << "Here" << endl;
+		}
 	}
 }
+
+double makeSP(vector<stock> s){
+	double total = 0;
+	for(int i=0;i<60;i++){
+		total += s[i].get_price();
+	}
+	return total = total / 60;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
