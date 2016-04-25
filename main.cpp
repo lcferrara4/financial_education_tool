@@ -78,7 +78,7 @@ int main(){
 	for(int i=0;i<60;i++){
 		// cout << stock_Names[i] << " " << buy_stock << endl;
 		if(stock_Names[i] == buy_stock){
-			stock_buy = stock_Names[i].get_price();
+			stock_buy = stocks[i].get_price();
 		}
 	}
 	
