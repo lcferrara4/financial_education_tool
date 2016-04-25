@@ -36,7 +36,7 @@ void User::run(){
     deductions = mortDeduct+stuDeduct+stockDeduct; 
 
     Tax myTax(deductions);
-    myTax.calcItax(income,state);
+    myTax.calcItax(income,getState());
     myTax.writeToFile(); 
 
 }
@@ -47,4 +47,8 @@ void User::setStockDeduct(double value){
 
 void User::setIncome(double stockIncome){
     income = income +stockIncome; 
+}
+
+string User::getState(){
+    return state; 
 }

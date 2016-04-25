@@ -94,7 +94,8 @@ Tax::Tax(double deduct){
 void Tax::calcItax(double income, string UserState){
 
     state = clean(UserState); 
-    cout<<state; 
+    //cout<<"Enter state: ";
+        //cin>>state; 
     //string state = "Arizona";
     string newStr; 
     bool married=0; 
@@ -135,6 +136,7 @@ void Tax::calcItax(double income, string UserState){
     else{
     for(int i=0; i<size-1; i++){
         max = boost::lexical_cast<double>(row[size-1][2]);
+        cout<<max; 
         if (income >= max){
             stateRate=boost::lexical_cast<double>(row[size-1][1]); 
             break; 

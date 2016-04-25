@@ -13,6 +13,7 @@ class User{
         void run(); 
         void setStockDeduct(double);
         void setIncome(double); 
+        string getState(); 
     private:
         double stockDeduct; 
         double income; 
