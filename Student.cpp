@@ -13,6 +13,15 @@ Student::Student(){
     setScholar(scholar); 
 }
 
+/*Student::Student(double iRate, bool t, double pr, double mont, double schol){
+    setPrinc(pr); 
+    setTax(t); 
+    setMonths(mont); 
+    setRate(iRate); 
+    setScholar(schol);
+}
+*/
+
 void Student::setScholar(double s){
     scholarship=s; 
 }
@@ -42,7 +51,7 @@ void Student::createPlan(){
 
 ostream &operator<<(ostream &output, const Student &S){
 
-    output<<"\nSTUDENT LOAN"; 
+    output<<"MONTH\tAMOUNT"<<endl; 
     for (int i=0; i<S.table.size(); i++){
         for (int j=0; j<S.table[i].size(); j++){
             output<<S.table[i][j]<<'\t'; 

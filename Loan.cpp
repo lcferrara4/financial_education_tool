@@ -6,7 +6,7 @@ using namespace std;
 
 Loan::Loan(){
 
-    double rate, princ, months; 
+   /* double rate, princ, months; 
     bool tax; 
     
     cout<<"Enter interest rate: "<<endl; 
@@ -24,8 +24,9 @@ Loan::Loan(){
     setPrinc(princ); 
 
      
-
+*/
 }
+
 
 Loan::Loan(double iRate, bool tax, double p, double t){
 

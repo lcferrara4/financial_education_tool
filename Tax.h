@@ -19,16 +19,15 @@ class Tax{
     friend class User; 
 
     public: 
-        Tax(double, double);  
-        void getDeductions();
-        //Mortgage *getMortgage(); 
-        //Student *getStudent(); 
-        void calcItax(); 
+        Tax(double);  
+        void calcItax(double, string); 
+        void writeToFile(); 
     private:
-        double income; 
+        //double income; 
         string state; 
         double stateRate; 
         double fedRate; 
+        double netIncome;
         double deductions;
         double taxAmount; 
 	    Mortgage *myMort; 

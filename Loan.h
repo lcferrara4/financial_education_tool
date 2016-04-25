@@ -4,14 +4,12 @@
 
 using namespace std; 
 
-class Tax; 
+
 
 class Loan{
 
-    friend class Tax; 
-
     public:
-        Loan();
+        Loan(); 
         Loan(double, bool, double, double); 
         ~Loan(); 
         double getIrate(void); 

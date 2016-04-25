@@ -8,58 +8,43 @@
 
 User::User(){
 
-    Mortgage myMort; 
-    Student myStu;
+    cout<<"Enter Income: "; 
+    cin>>income; 
+    cout<<"Enter State: "; 
+    cin>>state; 
 
-    double mortDeduct, stuDeduct; 
-    
+}
+
+void User::run(){
+    Mortgage myMort(.5, 1, 1000, 6);  
+    Student myStu(0, 1, 500, 3, 0);
+
+    double mortDeduct, stuDeduct;
+    double userIncome, deductions;
+    string state; 
      
     mortDeduct = myMort.getPrinc();   
     myMort.amortize(); 
     cout<<myMort; 
 
-    stuDeduct = myStu.getPrinc(); 
-   
-    Tax myTax(mortDeduct, stuDeduct);
-    myTax.calcItax(); 
+    stuDeduct = myStu.getPrinc();
+    cout<<"\nSTUDENT LOAN PLAN"<<endl; 
+    myStu.createPlan(); 
+    cout<<myStu; 
 
-}
-/*
-User::~User(){
-    delete myTax; 
-    delete myMort; 
-    delete myStu; 
-}
+    cout<<"\nTAX INFORMATION";
+    deductions = mortDeduct+stuDeduct+stockDeduct; 
 
-
-
-Tax User::makeTax(double m, double s){
-    return new Tax(m,s);  
-}
-
-Mortgage User::makeMortgage(){
-    return new Mortgage; 
-}
-
-Student User::makeStudent(){
-    return new Student; 
-}
-
-
-Tax User::getTax(){
-
-    return myTax; 
-}
-
-Mortgage User::getMortgage(){
-
-    return myMort; 
-}
-
-Student User::getStudent(){
-
-    return myStu; 
+    Tax myTax(deductions);
+    myTax.calcItax(income,state);
+    myTax.writeToFile(); 
 
 }
 
-*/
+void User::setStockDeduct(double value){
+    stockDeduct = value; 
+}
+
+void User::setIncome(double stockIncome){
+    income = income +stockIncome; 
+}

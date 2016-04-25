@@ -5,27 +5,27 @@
 #include <stdlib.h>
 using namespace std;
 
-stock::stock(double b, double price, string name, default_random_engine & gen) : generator(gen) {
+stock::stock(double b, double price, string name,string type, default_random_engine & gen) : generator(gen) {
 
+	stock_type = type;
 	beta = b;
 	stock_price = price;
 	stock_name = name;
+}
 
-
+string stock::get_type(){
+	return stock_type;
 }
 
 double stock::get_beta(){
-
 	return beta;
 }
 
 double stock::get_price(){
-
 	return stock_price;
 }
 
 string stock::get_stockName(){
-
 	return stock_name;
 }
 
@@ -42,8 +42,7 @@ void stock::recalc_price(){
 	}
 
 	normal_distribution<double> distribution(50.0,25.0);
-	//cout << 'g ' << generator << endl;
-	//cout << 'rand' << distribution( generator) << endl;
+
 	random_chance = distribution(generator);
 	company_qualitative = distribution(generator);
 	company_quantitative = distribution(generator);
@@ -53,8 +52,6 @@ void stock::recalc_price(){
 	economy_fedReserve_news = distribution(generator);
 
 	stock_change = (company_quantitative*.25)+(company_qualitative*.25)+(insutry_advance*.15)+(industry_news*.15)+(economy_fedReserve_news*.1)+(economy_new*.05)+(random_chance*.05);
-
-	//cout << '-' << stock_change << '-' << endl;
 
 	stock_change = stock_change - 50;
 

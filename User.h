@@ -10,14 +10,13 @@ class User{
     friend class Tax; 
     public: 
         User(); 
-       // ~User();
-        Student makeStudent(); 
-        Mortgage makeMortgage(); 
-        Tax makeTax(double, double); 
-        Student getStudent(); 
-        Mortgage getMortgage(); 
-        Tax getTax();     
-    private: 
+        void run(); 
+        void setStockDeduct(double);
+        void setIncome(double); 
+    private:
+        double stockDeduct; 
+        double income; 
+        string state; 
         //Mortgage myMort;
         //Tax myTax(double, double);
         //Student myStu; 

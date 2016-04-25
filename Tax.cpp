@@ -11,10 +11,11 @@
 #include "Tax.h"
 
 using namespace std; 
-Tax::Tax(double mortDeductions, double studentDeductions){
+Tax::Tax(double deduct){
 
-	  deductions = mortDeductions + studentDeductions; 
-
+    //income = 2500; 
+	deductions = deduct;  
+      
     int count=0; 
     string word, line; 
     vector<string> temp; 
@@ -32,11 +33,7 @@ Tax::Tax(double mortDeductions, double studentDeductions){
             count =0; 
         }
     }
-    for(int i=0; i<singleState.size(); i++){
-        for (int j=0; j<singleState[i].size(); j++){
-            //cout<<singleState[i][j];  
-        }
-    }
+
     inFile.close(); 
     ifstream inFile2; 
     inFile2.open("marriedTaxes.data"); 
@@ -94,18 +91,18 @@ Tax::Tax(double mortDeductions, double studentDeductions){
     
 }
 
-void Tax::calcItax(){
+void Tax::calcItax(double income, string UserState){
 
-    string state = "NewJersey";
+    state = clean(UserState); 
+    cout<<state; 
+    //string state = "Arizona";
     string newStr; 
     bool married=0; 
     bool single=1; 
-    vector<vector<string> > row; 
-    income=25000;
-    double value, value2; 
+    vector<vector<string> > row;  
+    double value, value2,max;  
 
     //find state
-
     if (single){
         for(int i=0; i<singleState.size(); i++){
             if ((clean(singleState[i][0])) == state){
@@ -121,39 +118,130 @@ void Tax::calcItax(){
             }
         }
     }
-
-       //get state tax rate based on income 
-    for(int i=0; i<(row.size()-1); i++){
-        value = boost::lexical_cast<double>(row[i][2]); //boost typecasts string to double
-        value2=boost::lexical_cast<double>(row[i+1][2]); //boost typecasts string to double 
-            
-        if (income >= value && income <value2){
-               stateRate=boost::lexical_cast<double>(row[i][1]); 
-               cout<<stateRate; 
-               break; 
+/*
+    for(int i=0; i<row.size(); i++){
+        for(int j=0; j<row[i].size(); j++){ 
+            cout<<row[i][j]<<' '; 
+        }
+        cout<<' '; 
+    }
+    */
+    
+    //get state tax rate based on income
+    int size = row.size();
+    if (size == 1){
+        stateRate = boost::lexical_cast<double>(row[0][1]); 
+    }
+    else{
+    for(int i=0; i<size-1; i++){
+        max = boost::lexical_cast<double>(row[size-1][2]);
+        if (income >= max){
+            stateRate=boost::lexical_cast<double>(row[size-1][1]); 
+            break; 
+        }
+        else{
+            value = boost::lexical_cast<double>(row[i][2]); //boost typecasts string to double
+            value2 = boost::lexical_cast<double>(row[i+1][2]); //boost typecasts string to double
+                if (income >= value && income < value2){
+                    stateRate = boost::lexical_cast<double>(row[i][1]);  
+                    break; 
+                }
         }
     }
-    //get federal state rate based on income 
-    if (single){
+    }
+    //get federal state rate based on income  
+/*
+    for(int i=0; i<singleFed.size(); i++){
+        for(int j=0; j<singleFed[i].size(); j++){
+            cout<<singleFed[i][j]<<" "; 
+        }
+        cout<<endl; 
+    }
+*/
+   if (single){
         for(int i=0; i<singleFed.size()-1; i++){
-            value=boost::lexical_cast<double>(singleFed[i][1]); 
-            value2=boost::lexical_cast<double>(singleFed[i+1][1]); 
-
-            if (income >= value && income <value2){
-                fedRate=boost::lexical_cast<double>(singleFed[i][0]); 
+            //cout<<"inFed"; 
+            if (income >=413200){//highest tax bracket
+                fedRate = .396; 
+                break;
+            }
+           /* else{
+                value = boost::lexical_cast<double>(singleFed[i][1]); 
+                value2 = boost::lexical_cast<double>(singleFed[i+1][1]); 
+                cout<<value<<" "<<value2<<endl; 
+                    if (income >= value && income < value2){
+                        cout<<singleFed[i][0]; 
+                        fedRate = boost::lexical_cast<double>(singleFed[i][0]); 
+                        cout<<"after"; 
+                        break; 
+                    }
+            }
+            */
+            else if(income >=411500 && income <413200){
+                fedRate = .35; 
                 break; 
             }
+            else if(income <411500 && income >= 189300){
+                fedRate = .28;
+                break; 
+            }
+            else if (income<189300 && income >=90750){
+                fedRate = .25; 
+                break; 
+            }
+            else if(income < 90750 && income >=37450){
+                fedRate = .15; 
+                break; 
+            }
+            else if (income <37450 && income >=9225){
+                fedRate = .10; 
+                break; 
+            }
+            else{
+                fedRate = .05; 
+                break; 
+            } 
         }
     }
     else if (married){
         for (int i=0; i<marriedFed.size()-1; i++){
-            value=boost::lexical_cast<double>(marriedFed[i][1]); 
-            value2=boost::lexical_cast<double>(marriedFed[i+1][1]); 
-
-            if(income >= value && income <value2){
-                fedRate=boost::lexical_cast<double>(marriedFed[i][0]);
+            if (income >=464850){
+                fedRate = .396; 
                 break; 
             }
+             else if(income >=411500 && income <464850){
+                fedRate = .35; 
+                break; 
+            }
+            else if(income <411500 && income >= 230450){
+                fedRate = .28;
+                break; 
+            }
+            else if (income<230450 && income >=151200){
+                fedRate = .25; 
+                break; 
+            }
+            else if(income < 151200 && income >=74900){
+                fedRate = .15; 
+                break; 
+            }
+            else if (income <74900 && income >=18450){
+                fedRate = .10; 
+                break; 
+            }
+            else{
+                fedRate = .05; 
+                break; 
+            }
+            /*else if(income <=464850){
+                value=boost::lexical_cast<double>(marriedFed[i][1]); 
+                value2=boost::lexical_cast<double>(marriedFed[i+1][1]); 
+                if(income >= value && income <value2){
+                    fedRate=boost::lexical_cast<double>(marriedFed[i][0]);
+                    break; 
+                }
+            }*/
+
         }
     }
 
@@ -161,18 +249,23 @@ void Tax::calcItax(){
         stateRate = boost::lexical_cast<double>(row[0][1]); 
         stateRate = stateRate * fedRate / 100; 
      }
-
-
-
+     //if (stateRate < .0000000000001){
+     //    stateRate = 0; 
+     //}
 
     //CALCULATE INCOME TAX 
+     
+    double taxable; 
+    taxable = income - deductions;
+     
+    cout<<endl<<fedRate<<" is fed, state is: "<<stateRate<<endl; 
+
+    netIncome = income -taxable*stateRate - taxable*fedRate; 
+
+    cout<<income<<" is your income"<<endl; 
+
     
-    double taxable = income - deductions; 
-
-    taxAmount = taxable -taxable*stateRate - taxable*fedRate; 
-
-    cout<<income<<" is your income, your tax rate is: "<<endl; 
-
+    cout<<"Net income: "<<netIncome<<endl; 
 }
 
 string Tax::clean(string state){
@@ -185,13 +278,14 @@ string Tax::clean(string state){
     return state; 
 }
 
-/*
-void Tax::getDeductions(){
+void Tax::writeToFile(){
 
-    
-    if (myMort.getTax()){ //bool returns whether or not loan is tax deductible 
-        deductions+=myMort.getPrinc(); 
-    }
+    ofstream myFile; 
+
+    myFile.open("taxInfo.txt"); 
+    myFile<<"state rate for"<<state<<": "<<stateRate<<endl;
+    myFile<<"federal tax rate: "<<fedRate<<endl; 
+    myFile <<"netIncome: "<<netIncome<<endl; 
+    myFile.close(); 
 
 }
-*/
