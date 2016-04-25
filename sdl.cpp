@@ -5,84 +5,12 @@
 #include <stdio.h>
 #include <string>
 #include <cmath>
+#include <fstream>
+
+#include "LTexture.h"
+#include "LButton.h"
 
 using namespace std;
-
-//Screen dimension constants
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
-
-//Button constants
-const int BUTTON_WIDTH = SCREEN_WIDTH / 8;
-const int BUTTON_HEIGHT = SCREEN_HEIGHT / 8;
-const int TOTAL_BUTTONS = 5;
-
-class LTexture
-{
-        public:
-                //Initializes variables
-                LTexture();
-
-                //Deallocates memory
-                ~LTexture();
-
-                //Loads image at specified path
-                bool loadFromFile( std::string path );
-
-                //Creates image from font string
-                bool loadFromRenderedText( std::string textureText, SDL_Color textColor );
-
-                //Deallocates texture
-                void free();
-                
-                //Set color modulation
-                void setColor( Uint8 red, Uint8 green, Uint8 blue );
-                
-                //Set blending
-                void setBlendMode( SDL_BlendMode blending );
-
-                //Set alpha modulation
-                void setAlpha( Uint8 alpha );
-                
-                //Renders texture at given point
-                void render( int x, int y, SDL_Rect* clip = NULL, double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE );
-                
-                //Gets image dimensions
-                int getWidth();
-                int getHeight();
-        
-        private:
-                //The actual hardware texture
-                SDL_Texture* mTexture;
-
-                //Image dimensions
-                int mWidth;
-                int mHeight;
-};
-
-//The mouse button
-class LButton
-{
-        public:
-                //Initializes internal variables
-                LButton();
-
-                //Sets top left position
-                void setPosition( int x, int y );
-
-                //Handles mouse event
-                int handleEvent( SDL_Event* e );
-
-                //Shows button sprite
-                void render();
-
-        private:
-                //Top left position
-                SDL_Point mPosition;
-
-                //Currently used global sprite
-                //LButtonSprite mCurrentSprite;
-};
 
 //Starts up SDL and creates window
 bool init();
@@ -92,24 +20,6 @@ bool loadMedia();
 
 //Frees media and shuts down SDL
 void close();
-
-//Loads individual image as texture
-//SDL_Texture* loadTexture( std::string path );
-
-//The window we'll be rendering to
-SDL_Window* gWindow = NULL;
-
-//The window renderer
-SDL_Renderer* gRenderer = NULL;
-
-//Globally used font
-TTF_Font *gFont = NULL;
-
-/*
-//Mouse button sprites
-SDL_Rect gSpriteClips[ BUTTON_SPRITE_TOTAL ];
-LTexture gButtonSpriteSheetTexture;
-*/
 
 //Buttons objects
 LButton gButtons[ TOTAL_BUTTONS ];
@@ -124,13 +34,19 @@ LTexture plannerTextTexture;
 //Home Screen Rendered Textures
 LTexture welcomeTextTexture;
 
-//Loan Screen Rendered Textures
+//Tax Screen Rendered Textures
 LTexture taxScreenTextTexture;
 LTexture taxPromptTextTexture;
 LTexture taxInputTextTexture;
+LTexture statePromptTextTexture;
+LTexture stateInputTextTexture;
+LTexture statusPromptTextTexture;
+LTexture marriedInputTextTexture;
+LTexture singleInputTextTexture;
 
 //Stock Screen Rendered Textures
 LTexture stockScreenTextTexture;
+LTexture stocksTextTexture[50];
 
 //Loan Screen Rendered Textures
 LTexture loanScreenTextTexture;
@@ -141,209 +57,6 @@ LTexture monthInputTextTexture;
 
 //Planner Screen Rendered Textures
 LTexture plannerScreenTextTexture;
-
-
-
-LTexture::LTexture()
-{
-        //Initialize
-        mTexture = NULL;
-        mWidth = 0;
-        mHeight = 0;
-}
-
-LTexture::~LTexture()
-{
-        //Deallocate
-        free();
-}
-
-bool LTexture::loadFromFile( std::string path )
-{
-        //Get rid of preexisting texture
-        free();
-
-        //The final texture
-        SDL_Texture* newTexture = NULL;
-
-        //Load image at specified path
-        SDL_Surface* loadedSurface = IMG_Load( path.c_str() );
-        if( loadedSurface == NULL )
-        {
-                printf( "Unable to load image %s! SDL_image Error: %s\n", path.c_str(), IMG_GetError() );
-        }
-        else
-        {
-                //Color key image
-                SDL_SetColorKey( loadedSurface, SDL_TRUE, SDL_MapRGB( loadedSurface->format, 0, 0xFF, 0xFF ) );
-
-                //Create texture from surface pixels
-        newTexture = SDL_CreateTextureFromSurface( gRenderer, loadedSurface );
-                if( newTexture == NULL )
-                {
-                        printf( "Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError() );
-                }
-                else
-                {
-                        //Get image dimensions
-                        mWidth = loadedSurface->w;
-                        mHeight = loadedSurface->h;
-                }
-
-                //Get rid of old loaded surface
-                SDL_FreeSurface( loadedSurface );
-        }
-
-        //Return success
-        mTexture = newTexture;
-        return mTexture != NULL;
-}
-
-bool LTexture::loadFromRenderedText( std::string textureText, SDL_Color textColor )
-{
-        //Get rid of preexisting texture
-        free();
-
-        //Render text surface
-        SDL_Surface* textSurface = TTF_RenderText_Solid( gFont, textureText.c_str(), textColor );
-        if( textSurface == NULL )
-        {
-                printf( "Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError() );
-        }
-        else
-        {
-                //Create texture from surface pixels
-        mTexture = SDL_CreateTextureFromSurface( gRenderer, textSurface );
-                if( mTexture == NULL )
-                {
-                        printf( "Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError() );
-                }
-                else
-                {
-                        //Get image dimensions
-                        mWidth = textSurface->w;
-                        mHeight = textSurface->h;
-                }
-
-                //Get rid of old surface
-                SDL_FreeSurface( textSurface );
-        }
-
-        //Return success
-        return mTexture != NULL;
-}
-
-void LTexture::free()
-{
-        //Free texture if it exists
-        if( mTexture != NULL )
-        {
-                SDL_DestroyTexture( mTexture );
-                mTexture = NULL;
-                mWidth = 0;
-                mHeight = 0;
-        }
-}
-
-void LTexture::setColor( Uint8 red, Uint8 green, Uint8 blue )
-{
-        //Modulate texture rgb
-        SDL_SetTextureColorMod( mTexture, red, green, blue );
-}
-
-void LTexture::setBlendMode( SDL_BlendMode blending )
-{
-        //Set blending function
-        SDL_SetTextureBlendMode( mTexture, blending );
-}
-
-void LTexture::setAlpha( Uint8 alpha )
-{
-        //Modulate texture alpha
-        SDL_SetTextureAlphaMod( mTexture, alpha );
-}
-
-void LTexture::render( int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip )
-{
-        //Set rendering space and render to screen
-        SDL_Rect renderQuad = { x, y, mWidth, mHeight };
-
-        //Set clip rendering dimensions
-        if( clip != NULL )
-        {
-                renderQuad.w = clip->w;
-                renderQuad.h = clip->h;
-        }
-
-        //Render to screen
-        SDL_RenderCopyEx( gRenderer, mTexture, clip, &renderQuad, angle, center, flip );
-}
-
-int LTexture::getWidth()
-{
-        return mWidth;
-}
-
-int LTexture::getHeight()
-{
-        return mHeight;
-}
-
-LButton::LButton()
-{
-        mPosition.x = 0;
-        mPosition.y = 0;
- 
-}
-
-void LButton::setPosition( int x, int y )
-{
-        mPosition.x = x;
-        mPosition.y = y;
-}
-
-int LButton::handleEvent( SDL_Event* e )
-{
-        //If mouse event happened
-        if( e->type == SDL_MOUSEBUTTONDOWN )
-        {
-                //Get mouse position
-                int x, y;
-                SDL_GetMouseState( &x, &y );
-
-                //Check if mouse is in button
-                bool inside = true;
-	
-                //Mouse is left of the button
-                if( x < mPosition.x )
-                {
-                        inside = false;
-                }
-                //Mouse is right of the button
-                else if( x > mPosition.x + BUTTON_WIDTH )
-                {
-                        inside = false;
-                }
-                //Mouse above the button
-                else if( y < mPosition.y )
-                {
-                        inside = false;
-                }
-                //Mouse below the button
-                else if( y > mPosition.y + BUTTON_HEIGHT )
-                {
-                        inside = false;
-                }
-
-                //Mouse is inside button
-                if( inside )
-                {
-			return 1;
-		}
-		return 0;
-        }
-}
-
 
 bool init()
 {
@@ -430,88 +143,59 @@ bool loadMedia()
         {
                 //Render text
                 SDL_Color textColor = { 0, 0, 0 };
-                if( !mainTextTexture.loadFromRenderedText( "Home", textColor ) )
-                {
-                        printf( "Failed to render text texture!\n" );
-                        success = false;
-                }
-		if( !taxTextTexture.loadFromRenderedText( "Taxes", textColor ) )
-                {
-                        printf( "Failed to render text texture!\n" );
-                        success = false;
-                }
-                if( !loanTextTexture.loadFromRenderedText( "Loans", textColor ) )
-                {
-                        printf( "Failed to render text texture!\n" );
-                        success = false;
-                }
-                if( !stockTextTexture.loadFromRenderedText( "Stocks", textColor ) )
-                {
-                        printf( "Failed to render text texture!\n" );
-                        success = false;
-                }
-                if( !plannerTextTexture.loadFromRenderedText( "Planner", textColor ) )
-                {
-                        printf( "Failed to render text texture!\n" );
-                        success = false;
-                }
- 
+                mainTextTexture.loadFromRenderedText( "Home", textColor );
+		taxTextTexture.loadFromRenderedText( "Taxes", textColor );
+                loanTextTexture.loadFromRenderedText( "Loans", textColor );
+                stockTextTexture.loadFromRenderedText( "Stocks", textColor );
+                plannerTextTexture.loadFromRenderedText( "Planner", textColor );
        }
+
+        gFont = TTF_OpenFont( "fonts/cooper_light.ttf", 12 );
+        if( gFont == NULL )
+        {
+                printf( "Failed to load cooper light font! SDL_ttf Error: %s\n", TTF_GetError() );
+                success = false;
+        }
+        else
+        {
+	        SDL_Color textColor = { 255, 255, 255 };
+
+		ifstream inFile;
+        	inFile.open ("stock_names.txt");
+
+        	string word;
+		for( int i = 0; i < 50; i++ ){
+			std::getline(inFile, word);
+			stocksTextTexture[i].loadFromRenderedText( word, textColor);
+		}
+        }
+
 
         //Open font for welcome message
         gFont = TTF_OpenFont( "fonts/sans_serif_nb.ttf", 28 );
         if( gFont == NULL )
         {
-                printf( "Failed to load lazy font! SDL_ttf Error: %s\n", TTF_GetError() );
+                printf( "Failed to load Sans Serif font! SDL_ttf Error: %s\n", TTF_GetError() );
                 success = false;
         }
         else
         {
+
                 //Render text
                 SDL_Color textColor = { 255, 255, 255 };
-                if( !welcomeTextTexture.loadFromRenderedText( "Welcome to your Financial Planner", textColor ) )
-                {
-                        printf( "Failed to render text texture!\n" );
-                        success = false;
-                }
-                if( !taxScreenTextTexture.loadFromRenderedText( "TAXES", textColor ) )
-                {
-                        printf( "Failed to render text texture!\n" );
-                        success = false;
-                }
-                if( !loanScreenTextTexture.loadFromRenderedText( "LOANS", textColor ) )
-                {
-                        printf( "Failed to render text texture!\n" );
-                        success = false;
-                }
-                if( !stockScreenTextTexture.loadFromRenderedText( "STOCKS", textColor ) )
-                {
-                        printf( "Failed to render text texture!\n" );
-                        success = false;
-                }
-                if( !plannerScreenTextTexture.loadFromRenderedText( "YOUR PLAN", textColor ) )
-                {
-                        printf( "Failed to render text texture!\n" );
-                        success = false;
-                }
-
-                if( !gPromptTextTexture.loadFromRenderedText( "Enter Text:", textColor ) )
-                {
-                        printf( "Failed to render prompt text!\n" );
-                        success = false;
-                }
-                if( !monthPromptTextTexture.loadFromRenderedText( "Enter Months:", textColor ) )
-                {
-                        printf( "Failed to render prompt text!\n" );
-                        success = false;
-                }
-                if( !taxPromptTextTexture.loadFromRenderedText( "Tax Text:", textColor ) )
-                {
-                        printf( "Failed to render prompt text!\n" );
-                        success = false;
-                }
-        }
-
+                welcomeTextTexture.loadFromRenderedText( "Welcome to your Financial Planner", textColor );
+                taxScreenTextTexture.loadFromRenderedText( "TAXES", textColor );
+                loanScreenTextTexture.loadFromRenderedText( "LOANS", textColor );
+                stockScreenTextTexture.loadFromRenderedText( "STOCKS", textColor );
+                plannerScreenTextTexture.loadFromRenderedText( "YOUR PLAN", textColor );
+                gPromptTextTexture.loadFromRenderedText( "Principle:", textColor );
+                monthPromptTextTexture.loadFromRenderedText( "Months:", textColor );
+                taxPromptTextTexture.loadFromRenderedText( "Income:", textColor );
+                statePromptTextTexture.loadFromRenderedText( "State:", textColor );
+                statusPromptTextTexture.loadFromRenderedText( "Status:", textColor );
+                marriedInputTextTexture.loadFromRenderedText( "Married", textColor );
+                singleInputTextTexture.loadFromRenderedText( "Single", textColor );
+	}
 
 
 
@@ -540,6 +224,15 @@ void close()
 	
 	taxPromptTextTexture.free();
 	taxInputTextTexture.free();
+	statePromptTextTexture.free();
+	stateInputTextTexture.free();
+	statusPromptTextTexture.free();
+        marriedInputTextTexture.free();
+        singleInputTextTexture.free();
+
+	for( int i = 0; i < 50; i++ ){
+		stocksTextTexture[i].free();
+	}
 
         //Free global font
         TTF_CloseFont( gFont );
@@ -586,14 +279,18 @@ int main( int argc, char* args[] )
                         SDL_Color textColor = { 0, 250, 250, 0xFF };
 
                         //The current input text.
-                        std::string inputText = "Principal";
+                        std::string inputText = "";
                         gInputTextTexture.loadFromRenderedText( inputText.c_str(), textColor );
 
-                        std::string monthText = "Months";
+                        std::string monthText = "";
                         monthInputTextTexture.loadFromRenderedText( monthText.c_str(), textColor );
  		
-			std::string taxText = "Income";
+			std::string taxText = "";
 			taxInputTextTexture.loadFromRenderedText( taxText.c_str(), textColor );                       
+
+                        std::string stateText = "";
+                        stateInputTextTexture.loadFromRenderedText( stateText.c_str(), textColor );
+
 
                         //Enable text input
                         SDL_StartTextInput();
@@ -607,7 +304,8 @@ int main( int argc, char* args[] )
 				bool renderText = false;
 				bool renderMonthText = false;
 				bool renderTaxText = false;
-	
+				bool renderStateText = false;	
+
 				//Handle events on queue
 				while( SDL_PollEvent( &e ) != 0 )
 				{
@@ -630,9 +328,18 @@ int main( int argc, char* args[] )
                                                 //Handle backspace
                                                 if( e.key.keysym.sym == SDLK_BACKSPACE )
                                                 {
-							if( taxText.length() > 0 && currentScreen == 1 ){
-                                                                taxText = taxText.substr(0, taxText.size() - 1);
-                                                                renderTaxText = true;
+							if( currentScreen == 1 ){
+                                                                if( y > SCREEN_HEIGHT / 8 + taxPromptTextTexture.getHeight() && y < SCREEN_HEIGHT / 8 + taxPromptTextTexture.getHeight() + 35 ){
+                                                                        if( taxText.length() > 0 && x > SCREEN_WIDTH / 4 - 5 && x < SCREEN_WIDTH / 4 + 120 ){
+                                                                		taxText = taxText.substr(0, taxText.size() - 1);
+                                                                                renderTaxText = true;
+                                                                        }
+                                                                        else if( stateText.length() > 0 && x > SCREEN_WIDTH / 2 - 5 && x < SCREEN_WIDTH / 2 + 220 ){
+                                                                		stateText = stateText.substr(0, stateText.size() - 1);
+                                                                                renderStateText = true;
+                                                                        }
+                                                                }
+
 							}
                                                         //lop off character - loan screen
                                                         else if( currentScreen == 3 ){
@@ -650,7 +357,15 @@ int main( int argc, char* args[] )
                                                 else if( e.key.keysym.sym == SDLK_c && SDL_GetModState() & KMOD_CTRL )
                                                 {
 							if( currentScreen == 1 ){
-                                                                SDL_SetClipboardText( taxText.c_str() );
+                                                                if( y > SCREEN_HEIGHT / 8 + taxPromptTextTexture.getHeight() && y < SCREEN_HEIGHT / 8 + taxPromptTextTexture.getHeight() + 35 ){
+                                                                        if( x > SCREEN_WIDTH / 4 - 5 && x < SCREEN_WIDTH / 4 + 120 ){
+                                                                		SDL_SetClipboardText( taxText.c_str() );
+                                                                        }
+                                                                        else if( x > SCREEN_WIDTH / 2 - 5 && x < SCREEN_WIDTH / 2 + 220 ){
+                                                                		SDL_SetClipboardText( stateText.c_str() );
+                                                                        }
+                                                                }
+
 
 							}
 							else if( currentScreen == 3 ){
@@ -664,8 +379,16 @@ int main( int argc, char* args[] )
                                                 else if( e.key.keysym.sym == SDLK_v && SDL_GetModState() & KMOD_CTRL )
                                                 {
 							if( currentScreen == 1 ){
-                                                                taxText = SDL_GetClipboardText();
-                                                                renderTaxText = true;
+								if( y > SCREEN_HEIGHT / 8 + taxPromptTextTexture.getHeight() && y < SCREEN_HEIGHT / 8 + taxPromptTextTexture.getHeight() + 35 ){
+									if( x > SCREEN_WIDTH / 4 - 5 && x < SCREEN_WIDTH / 4 + 120 ){
+										taxText = SDL_GetClipboardText();
+                                                                		renderTaxText = true;
+									}
+									else if( x > SCREEN_WIDTH / 2 - 5 && x < SCREEN_WIDTH / 2 + 220 ){
+										stateText = SDL_GetClipboardText();
+                                                                                renderStateText = true; 
+                                                                        }
+								}
 							}
 							else if( currentScreen == 3 ){
 								if( y < 150 ){
@@ -686,8 +409,16 @@ int main( int argc, char* args[] )
                                                 if( !( ( e.text.text[ 0 ] == 'c' || e.text.text[ 0 ] == 'C' ) && ( e.text.text[ 0 ] == 'v' || e.text.text[ 0 ] == 'V' ) && SDL_GetModState() & KMOD_CTRL ) )
                                                 {
 							if( currentScreen == 1 ){
-                                                                taxText += e.text.text;
-                                                                renderTaxText = true;
+                                                                if( y > SCREEN_HEIGHT / 8 + taxPromptTextTexture.getHeight() && y < SCREEN_HEIGHT / 8 + taxPromptTextTexture.getHeight() + 35 ){
+                                                                        if( x > SCREEN_WIDTH / 4 - 5 && x < SCREEN_WIDTH / 4 + 120 ){
+                       								taxText += e.text.text;
+                                                                                renderTaxText = true;
+                                                                        }
+                                                                        else if( x > SCREEN_WIDTH / 2 - 5 && x < SCREEN_WIDTH / 2 + 220 ){
+                       								stateText += e.text.text;
+                                                                                renderStateText = true;
+                                                                        }
+                                                                }
 							}
 							else if( currentScreen == 3 ){
                                                         	//Append character
@@ -762,6 +493,21 @@ int main( int argc, char* args[] )
                                                 taxInputTextTexture.loadFromRenderedText( " ", textColor );
                                         }
                                 } 
+                                if( renderStateText )
+                                {
+                                        //Text is not empty 
+                                        if( stateText != "" )
+                                        {
+                                                //Render new text
+                                                stateInputTextTexture.loadFromRenderedText( stateText.c_str(), textColor );
+                                        }
+                                        //Text is empty
+                                        else
+                                        {
+                                                //Render space texture
+                                                stateInputTextTexture.loadFromRenderedText( " ", textColor );
+                                        }
+                                }
 
 
 				//Clear screen
@@ -808,13 +554,179 @@ int main( int argc, char* args[] )
 				else if( currentScreen == 1 )
 				{
                                         taxScreenTextTexture.render( SCREEN_WIDTH / 2 - taxScreenTextTexture.getWidth() / 2 ,  0 );
+                                
+				        // Input Rect
+                                        SDL_SetRenderDrawColor( gRenderer, 0x00, 0xFF, 0x00, 0xFF );
+                                        
+					SDL_Rect incomeRect = { SCREEN_WIDTH / 4 - 5, SCREEN_HEIGHT / 8 + taxPromptTextTexture.getHeight(), 125, 35 };
+                                        SDL_RenderDrawRect( gRenderer, &incomeRect );
+
+                                        SDL_Rect stateRect = { SCREEN_WIDTH / 2 - 5, SCREEN_HEIGHT / 8 + statePromptTextTexture.getHeight(), 225, 35 };
+                                        SDL_RenderDrawRect( gRenderer, &stateRect );
+
+                                        SDL_Rect marriedRect = { 3 * SCREEN_WIDTH / 4 - 5, SCREEN_HEIGHT / 8 + statusPromptTextTexture.getHeight(), 125, 35 };
+                                        SDL_RenderDrawRect( gRenderer, &marriedRect );
+
+					SDL_Rect singleRect = { 3 * SCREEN_WIDTH / 4 - 5, SCREEN_HEIGHT / 8 + statusPromptTextTexture.getHeight() + 35, 125, 35 };
+                                        SDL_RenderDrawRect( gRenderer, &singleRect );
+
+					if( x > (3 * SCREEN_WIDTH / 4 - 5) && x < (3 * SCREEN_WIDTH / 4 + 120) ){
+						if( y > (SCREEN_HEIGHT / 8 + statusPromptTextTexture.getHeight()) && y < (SCREEN_HEIGHT / 8 + statusPromptTextTexture.getHeight() + 35) )
+							SDL_RenderFillRect( gRenderer, &marriedRect );
+						else if( y > (SCREEN_HEIGHT / 8 + statusPromptTextTexture.getHeight() + 35) && y < (SCREEN_HEIGHT / 8 + statusPromptTextTexture.getHeight() + 70) )
+							SDL_RenderFillRect( gRenderer, &singleRect );
+					}
+
                                         //Render text textures
-                                        taxPromptTextTexture.render( ( SCREEN_WIDTH - taxPromptTextTexture.getWidth() ) / 2, 100 );
-                                        taxInputTextTexture.render( ( SCREEN_WIDTH - taxInputTextTexture.getWidth() ) / 2, 100 + taxPromptTextTexture.getHeight() );
+                                        taxPromptTextTexture.render( SCREEN_WIDTH / 4, SCREEN_HEIGHT / 8 );
+                                        taxInputTextTexture.render( SCREEN_WIDTH / 4,  SCREEN_HEIGHT / 8 + taxPromptTextTexture.getHeight() + 5 );
+                                        statePromptTextTexture.render( SCREEN_WIDTH / 2, SCREEN_HEIGHT / 8 );
+                                        stateInputTextTexture.render( SCREEN_WIDTH / 2,  SCREEN_HEIGHT / 8 + statePromptTextTexture.getHeight() + 5 );
+                                        statusPromptTextTexture.render( 3 * SCREEN_WIDTH / 4, SCREEN_HEIGHT / 8 );
+                                        marriedInputTextTexture.render( 3 * SCREEN_WIDTH / 4,  SCREEN_HEIGHT / 8 + statusPromptTextTexture.getHeight() + 5 );
+					singleInputTextTexture.render( 3 * SCREEN_WIDTH / 4,  SCREEN_HEIGHT / 8 + statusPromptTextTexture.getHeight() + 45 );
+
+
 				}	
 				else if( currentScreen == 2 )
 				{
                                         stockScreenTextTexture.render( SCREEN_WIDTH / 2 - stockScreenTextTexture.getWidth() / 2 ,  0 );
+
+					for( int i = 0; i < 10; i++ ){
+						for( int j = 0; j < 5; j++ ){
+                                			SDL_Rect stockRect = { 165 + (180 * j), 75 + (50 * i), 180, 50 };
+                                			SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0xFF, 0xFF );
+                                			SDL_RenderDrawRect( gRenderer, &stockRect );
+						}
+					}
+					int count = 0;
+					for( int i = 0; i < 10; i++ ){
+						for( int j = 0; j < 5; j++ ){
+							stocksTextTexture[count ].render( 170 + (180 * j), 80 + (50 * i));
+							count++;
+						}
+					}
+					if( y > 75 && y < 125 ){
+						if( x > 165 && x < 345 )
+							currentScreen = 50;
+						else if( x > 345 && x < 525 )
+							currentScreen = 51;
+						else if( x > 525 && x < 705 )
+							currentScreen = 52;	
+						else if( x > 705 && x < 885 )
+							currentScreen = 53;
+						else if( x > 885 && x < 1065 )
+							currentScreen = 54;
+					}
+                                        else if( y > 125 && y < 175 ){ 
+                                                if( x > 165 && x < 345 )
+                                                        currentScreen = 55;
+                                                else if( x > 345 && x < 525 )
+                                                        currentScreen = 56;
+                                                else if( x > 525 && x < 705 )
+                                                        currentScreen = 57;
+                                                else if( x > 705 && x < 885 )
+                                                        currentScreen = 58;
+                                                else if( x > 885 && x < 1065 )
+                                                        currentScreen = 59;
+                                        }
+                                        else if( y > 175 && y < 225 ){ 
+                                                if( x > 165 && x < 345 )
+                                                        currentScreen = 60;
+                                                else if( x > 345 && x < 525 )
+                                                        currentScreen = 61;
+                                                else if( x > 525 && x < 705 )
+                                                        currentScreen = 62;
+                                                else if( x > 705 && x < 885 )
+                                                        currentScreen = 63;
+                                                else if( x > 885 && x < 1065 )
+                                                        currentScreen = 64;
+                                        }
+                                        else if( y > 225 && y < 275 ){ 
+                                                if( x > 165 && x < 345 )
+                                                        currentScreen = 65;
+                                                else if( x > 345 && x < 525 )
+                                                        currentScreen = 66;
+                                                else if( x > 525 && x < 705 )
+                                                        currentScreen = 67;
+                                                else if( x > 705 && x < 885 )
+                                                        currentScreen = 68;
+                                                else if( x > 885 && x < 1065 )
+                                                        currentScreen = 69;
+                                        }
+                                        else if( y > 275 && y < 325 ){ 
+                                                if( x > 165 && x < 345 )
+                                                        currentScreen = 70;
+                                                else if( x > 345 && x < 525 )
+                                                        currentScreen = 71;
+                                                else if( x > 525 && x < 705 )
+                                                        currentScreen = 72;
+                                                else if( x > 705 && x < 885 )
+                                                        currentScreen = 73;
+                                                else if( x > 885 && x < 1065 )
+                                                        currentScreen = 74;
+                                        }
+                                        else if( y > 325 && y < 375 ){ 
+                                                if( x > 165 && x < 345 )
+                                                        currentScreen = 75;
+                                                else if( x > 345 && x < 525 )
+                                                        currentScreen = 76;
+                                                else if( x > 525 && x < 705 )
+                                                        currentScreen = 77;
+                                                else if( x > 705 && x < 885 )
+                                                        currentScreen = 78;
+                                                else if( x > 885 && x < 1065 )
+                                                        currentScreen = 79;
+                                        }
+                                        else if( y > 375 && y < 425 ){ 
+                                                if( x > 165 && x < 345 )
+                                                        currentScreen = 80;
+                                                else if( x > 345 && x < 525 )
+                                                        currentScreen = 81;
+                                                else if( x > 525 && x < 705 )
+                                                        currentScreen = 82;
+                                                else if( x > 705 && x < 885 )
+                                                        currentScreen = 83;
+                                                else if( x > 885 && x < 1065 )
+                                                        currentScreen = 84;
+                                        }
+                                        else if( y > 425 && y < 475 ){ 
+                                                if( x > 165 && x < 345 )
+                                                        currentScreen = 85;
+                                                else if( x > 345 && x < 525 )
+                                                        currentScreen = 86;
+                                                else if( x > 525 && x < 705 )
+                                                        currentScreen = 87;
+                                                else if( x > 705 && x < 885 )
+                                                        currentScreen = 88;
+                                                else if( x > 885 && x < 1065 )
+                                                        currentScreen = 89;
+                                        }
+                                        else if( y > 475 && y < 525 ){ 
+                                                if( x > 165 && x < 345 )
+                                                        currentScreen = 90;
+                                                else if( x > 345 && x < 525 )
+                                                        currentScreen = 91;
+                                                else if( x > 525 && x < 705 )
+                                                        currentScreen = 92;
+                                                else if( x > 705 && x < 885 )
+                                                        currentScreen = 93;
+                                                else if( x > 885 && x < 1065 )
+                                                        currentScreen = 94;
+                                        }
+                                        else if( y > 525 && y < 575 ){ 
+                                                if( x > 165 && x < 345 )
+                                                        currentScreen = 95;
+                                                else if( x > 345 && x < 525 )
+                                                        currentScreen = 96;
+                                                else if( x > 525 && x < 705 )
+                                                        currentScreen = 97;
+                                                else if( x > 705 && x < 885 )
+                                                        currentScreen = 98;
+                                                else if( x > 885 && x < 1065 )
+                                                        currentScreen = 99;
+                                        }
+
 				}
 				else if( currentScreen == 3 )
 				{
