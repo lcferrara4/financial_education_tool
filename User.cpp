@@ -8,45 +8,111 @@
 
 User::User(){
 
+	income = 50000;
+	state = "Indiana";
+	status = 0;
+
+	interestRate = 0; 
+	principle = 1000;
+	months = 1;
+	scholarship = 0;
+	type = 0;
+/*
     cout<<"Enter Income: "; 
     cin>>income; 
     cout<<"Enter State: "; 
     cin>>state; 
+*/
+}
 
+User::User(double i, string s, bool stat, double in, double p, int m, double schol, bool t){
+	income = i;
+	state = s;
+	status = stat; 
+	
+	interestRate = in;
+	principle = p;
+	months = m;
+	scholarship = schol;
+	type = t;
 }
 
 void User::run(){
-    Mortgage myMort(.5, 1, 1000, 6);  
-    Student myStu(0, 1, 500, 3, 0);
 
     double mortDeduct, stuDeduct;
     double userIncome, deductions;
-    string state; 
-     
-    mortDeduct = myMort.getPrinc();   
-    myMort.amortize(); 
-    cout<<myMort; 
 
-    stuDeduct = myStu.getPrinc();
-    cout<<"\nSTUDENT LOAN PLAN"<<endl; 
-    myStu.createPlan(); 
-    cout<<myStu; 
+	if( type ){
+    		Mortgage myMort(interestRate, 1, principle, months); 
+	    	mortDeduct = myMort.getPrinc();   
+		stuDeduct = 0;
+	    	myMort.amortize();
+		myMort.writeToFile();  
+	    	cout<<myMort; 
+	}
+	else{  
+    		Student myStu(interestRate, 1, principle, months, scholarship);
+		stuDeduct = myStu.getPrinc();
+		mortDeduct = 0;
+    		cout<<"\nSTUDENT LOAN PLAN"<<endl; 
+    		myStu.createPlan(); 
+    		myStu.writeToFile(); 
+		cout<<myStu; 
+	}
 
-    cout<<"\nTAX INFORMATION";
+	cout<<"USER RUNNING"<<endl;
+
+	string state; 
+        cout<<"\nTAX INFORMATION";
     deductions = mortDeduct+stuDeduct+stockDeduct; 
 
     Tax myTax(deductions);
-    myTax.calcItax(income,getState());
+    myTax.calcItax(income,getState(), getStatus());
     myTax.writeToFile(); 
 
+}
+
+bool User::getStatus(){
+	return status; 
 }
 
 void User::setStockDeduct(double value){
     stockDeduct = value; 
 }
 
-void User::setIncome(double stockIncome){
+void User::addIncome(double stockIncome){
     income = income +stockIncome; 
+}
+
+void User::setIncome(double i){
+	income = i; 
+}
+void User::setState(string s){
+	state = s;
+}
+
+void User::setStatus( bool s ){
+	status = s;
+}
+
+void User::setInterestRate(double i){
+        interestRate = i;
+}
+
+void User::setPrinciple(double p){
+        principle = p;
+}
+
+void User::setMonths( int m ){
+        months = m;
+}
+
+void User::setScholarship( double s ){
+	scholarship = s;
+}
+
+void User::setType( bool t ){
+        type = t;
 }
 
 string User::getState(){

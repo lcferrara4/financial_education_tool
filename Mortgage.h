@@ -19,10 +19,10 @@ class Mortgage : public Loan{
             setTax(t);
             setPrinc(princ); 
             setMonths(month);
-        }; 
-        void credit(double); 
+        };  
         void amortize(); 
-    private:
+	void writeToFile();     
+private:
         vector<vector<double> > table; 
 }; 
 

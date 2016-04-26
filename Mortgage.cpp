@@ -1,3 +1,4 @@
+#include <fstream>
 #include "Loan.h"
 #include "Mortgage.h"
 #include <iostream>
@@ -18,10 +19,7 @@ Mortgage::Mortgage(){
     
 }
 
-void Mortgage::credit(double credit){
-    double principal=getPrinc(); 
-    setPrinc(principal - credit); 
-}
+
 
 void Mortgage::amortize(){
     double principal=getPrinc(); 
@@ -68,3 +66,18 @@ ostream &operator<<(ostream &output, const Mortgage &M){
     }
 
 }
+
+
+void Mortgage::writeToFile(){
+
+        ofstream myFile; 
+        myFile.open("loanInfo.txt"); 
+        myFile<<"MONTH\tINTEREST BALANCE"<<endl; 
+	for(int i=0; i<table.size(); i++){
+                for(int j=0; j<table[i].size(); j++){
+                        myFile<<table[i][j]<<'\t';
+                }
+                myFile<<endl; 
+        }
+}
+

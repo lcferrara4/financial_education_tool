@@ -6,18 +6,23 @@
 #include <unistd.h>
 #include <vector>
 #include <fstream>
+
 #include "stock.h"
 #include "User.h"
+#include "SDL.h"
 using namespace std;
 
 double makeSP(vector<stock>);
 
-int main(){
-	//instantiate
+int main( int argc, char* args[]  ){
+		
+        SDL mySDL;
+        mySDL.handleEvents();
+
+//instantiate
 	default_random_engine generator(time(0));
 	vector<stock> stocks;
-	User myUser; 
-
+	//User myUser(mySDL.getIncome(), mySDL.getState(), mySDL.getStatus()); 
 	vector<string> stock_Names;
 
 	string in;
@@ -50,16 +55,17 @@ int main(){
 		}
 		change++;
 	}
-
+/*
 	// displays the stocks
 	for(int i=0;i<60;i++){
 		stocks[i].recalc_price();
 		cout << stocks[i].get_stockName() << " " <<stocks[i].get_price() << ' ' <<endl;
 	}
+*/
 
 	// Make S&P 500
 	SP = makeSP(stocks);
-	cout << "S&P 500 " << SP << endl;
+//	cout << "S&P 500 " << SP << endl;
 
 	
 	//usleep(10000);
@@ -83,10 +89,15 @@ int main(){
 	}
 	
 	total = stock_buy - stock_sell; //amount of money made in stocks
-    stock_buy = stock_buy * number_Stock; //amount of money currently in market
+    	stock_buy = stock_buy * number_Stock; //amount of money currently in market
+	
+	/*
 	myUser.setStockDeduct(stock_buy); 
-    myUser.setIncome(total); 
+    	myUser.setIncome(total); 
 	myUser.run(); 
+	*/
+
+
 }
 
 double makeSP(vector<stock> s){

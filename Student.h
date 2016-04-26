@@ -22,6 +22,7 @@ class Student : public Loan{
         }
         void createPlan();
         void setScholar(double); 
+	void writeToFile(); 
     private:
         double scholarship; 
         vector<vector<double> > table; 

@@ -1,3 +1,4 @@
+#include <fstream>
 #include "Loan.h"
 #include "Student.h"
 #include <iostream>
@@ -59,4 +60,17 @@ ostream &operator<<(ostream &output, const Student &S){
         output<<endl;
     }
 
+}
+
+void Student::writeToFile(){
+
+	ofstream myFile; 
+	myFile.open("loanInfo.txt"); 
+	myFile<<"MONTH\tAMOUNT"<<endl; 
+	for(int i=0; i<table.size(); i++){
+		for(int j=0; j<table[i].size(); j++){
+			myFile<<table[i][j]<<'\t';
+		}
+		myFile<<endl; 
+	}
 }

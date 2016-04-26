@@ -20,7 +20,7 @@ class Tax{
 
     public: 
         Tax(double);  
-        void calcItax(double, string); 
+        void calcItax(double, string, bool); 
         void writeToFile(); 
     private:
         //double income; 

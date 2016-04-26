@@ -91,15 +91,25 @@ Tax::Tax(double deduct){
     
 }
 
-void Tax::calcItax(double income, string UserState){
+void Tax::calcItax(double income, string UserState, bool filingStatus){
+
+
+	cout<<"CALCULATING TAX"<<endl; 
 
     state = clean(UserState); 
     //cout<<"Enter state: ";
         //cin>>state; 
     //string state = "Arizona";
-    string newStr; 
-    bool married=0; 
-    bool single=1; 
+    bool married, single; 
+	if (filingStatus){
+		married = 0; 
+		single = 1; 
+	}
+	else if(!filingStatus){
+		married =1; 
+		single = 0; 
+	}
+     cout<<"FILINGSTATUS= "<<filingStatus<<endl; 
     vector<vector<string> > row;  
     double value, value2,max;  
 
@@ -107,26 +117,27 @@ void Tax::calcItax(double income, string UserState){
     if (single){
         for(int i=0; i<singleState.size(); i++){
             if ((clean(singleState[i][0])) == state){
-                 row.push_back(singleState[i]); 
+                cout<<singleState[i][0]<<endl;  
+		row.push_back(singleState[i]); 
             }
         }
         
     }
-    else if (married){
-        for (int i=0; i<marriedState.size(); i++){
-            if (clean(marriedState[i][0]) == state){
-                row.push_back(marriedState[i]); 
+    if (married){
+        for (int k=0; k<marriedState.size(); k++){
+		if ((clean(marriedState[k][0])) == state){
+                row.push_back(marriedState[k]); 
             }
         }
     }
-/*
+
     for(int i=0; i<row.size(); i++){
         for(int j=0; j<row[i].size(); j++){ 
             cout<<row[i][j]<<' '; 
         }
         cout<<' '; 
     }
-    */
+
     
     //get state tax rate based on income
     int size = row.size();
@@ -285,9 +296,9 @@ void Tax::writeToFile(){
     ofstream myFile; 
 
     myFile.open("taxInfo.txt"); 
-    myFile<<"state rate for"<<state<<": "<<stateRate<<endl;
-    myFile<<"federal tax rate: "<<fedRate<<endl; 
-    myFile <<"netIncome: "<<netIncome<<endl; 
+    myFile<<stateRate<<endl;
+    myFile<<fedRate<<endl; 
+    myFile<<netIncome<<endl; 
     myFile.close(); 
 
 }

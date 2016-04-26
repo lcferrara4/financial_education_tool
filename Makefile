@@ -1,9 +1,6 @@
-main: main.o Loan.o Mortgage.o Student.o Tax.o User.o stock.o
-	g++ -std=c++11 main.o Loan.o Mortgage.o Student.o Tax.o User.o stock.o -o main
-
-main.o: main.cpp
-	g++ -std=c++11 -c main.cpp
-
+main: main.cpp Loan.o Mortgage.o Student.o Tax.o User.o stock.o
+	g++ -std=c++11 main.cpp Loan.o Mortgage.o Student.o Tax.o User.o stock.o -o main -lSDL2 -lSDL2_image -lSDL2_ttf
+ 
 User.o: User.cpp
 	g++ -std=c++11 -c User.cpp
 

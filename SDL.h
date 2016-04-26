@@ -6,11 +6,14 @@
 #include <string>
 #include <cmath>
 #include <fstream>
+#include <boost/lexical_cast.hpp>
 
+//#include "User.h"
 #include "LTexture.h"
 #include "LButton.h"
 
 using namespace std;
+ 
 
 class SDL
 {
@@ -36,13 +39,15 @@ class SDL
 		// get functions
 		double getIncome();
 		string getState();
-		string getStatus( int );
+		bool getStatus();
+		bool getTaxOutput();
 
 		string getType();
 		double getPrinciple();
 		int getMonths();
 		double getScholarship();
-
+		
+		void setTaxOutput();
 	private:
 		//Buttons objects
 		LButton gButtons[ TOTAL_BUTTONS ];
@@ -67,6 +72,10 @@ class SDL
 		LTexture marriedInputTextTexture;
 		LTexture singleInputTextTexture;
 
+		LTexture stateRateTextTexture;
+		LTexture fedRateTextTexture;
+		LTexture netIncomeTextTexture;
+
 		//Stock Screen Rendered Textures
 		LTexture stockScreenTextTexture;
 		LTexture spTextTexture;
@@ -87,10 +96,21 @@ class SDL
 		//Planner Screen Rendered Textures
 		LTexture plannerScreenTextTexture;
 
+		string state;
+		int income;
 		int type;
+		bool status;
+		User myUser;
+		bool output;
+		double interestRate;
+		double principle;
+		int months;
+		double scholarship;
+		bool loanType;
 };
 
 SDL::SDL(){
+	User myUser();
 }
 
 bool SDL::init()
@@ -299,7 +319,17 @@ void SDL::close()
 
 int SDL::handleEvents()
 {
+	income = 50000;
+	state = "Indiana";
+	status = 0;
 	int currentScreen = 0;
+	output = 0;
+
+	interestRate = 2;
+	principle = 1000;
+	months = 1;
+	scholarship = 0;
+	loanType = 1;
 
 	//Start up SDL and create window
 	if( !init() )
@@ -326,16 +356,16 @@ int SDL::handleEvents()
                         SDL_Color textColor = { 0, 250, 250, 0xFF };
 
                         //The current input text.
-                        std::string inputText = "0";
+                        std::string inputText = "20000";
                         princInputTextTexture.loadFromRenderedText( inputText.c_str(), textColor );
 
-                        std::string monthText = "0";
+                        std::string monthText = "1";
                         monthInputTextTexture.loadFromRenderedText( monthText.c_str(), textColor );
 
                         std::string scholText = "0";
                         scholInputTextTexture.loadFromRenderedText( scholText.c_str(), textColor );
  		
-			std::string taxText = "0";
+			std::string taxText = "50000";
 			taxInputTextTexture.loadFromRenderedText( taxText.c_str(), textColor );                       
 
                         std::string stateText = "Indiana";
@@ -499,6 +529,7 @@ int SDL::handleEvents()
 					//Text is not empty 
 					if( inputText != "" )
 					{
+						principle = boost::lexical_cast<double>(inputText);
 						//Render new text
 						princInputTextTexture.loadFromRenderedText( inputText.c_str(), textColor );
 					}
@@ -516,6 +547,7 @@ int SDL::handleEvents()
                                         //Text is not empty 
                                         if( monthText != "" )
                                         {
+						months = boost::lexical_cast<int>(monthText);
                                                 //Render new text
                                                 monthInputTextTexture.loadFromRenderedText( monthText.c_str(), textColor );
                                         }
@@ -533,7 +565,8 @@ int SDL::handleEvents()
                                         //Text is not empty 
                                         if( taxText != "" )
                                         {
-                                                //Render new text
+						income = boost::lexical_cast<double>(taxText);
+                                               //Render new text
                                                 taxInputTextTexture.loadFromRenderedText( taxText.c_str(), textColor );
                                         }
                                         //Text is empty
@@ -548,6 +581,7 @@ int SDL::handleEvents()
                                         //Text is not empty 
                                         if( stateText != "" )
                                         {
+						state = stateText;
                                                 //Render new text
                                                 stateInputTextTexture.loadFromRenderedText( stateText.c_str(), textColor );
                                         }
@@ -628,9 +662,17 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
 		welcomeTextTexture.render( SCREEN_WIDTH / 2 - welcomeTextTexture.getWidth() / 2 ,  SCREEN_HEIGHT / 2 - welcomeTextTexture.getHeight() / 2 );
 		currentScreen = 0;
 	}
-	else if( currentScreen == 1 )
-	{
+	else if( currentScreen == 1 ){
+		output = 0;
+		myUser.setIncome(income);
+		myUser.setState(state);
+		myUser.setStatus(status);
+
 		taxScreenTextTexture.render( SCREEN_WIDTH / 2 - taxScreenTextTexture.getWidth() / 2 ,  0 );
+		
+		SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0xFF );
+                SDL_Rect calcRect = { SCREEN_WIDTH / 4, 3 * SCREEN_HEIGHT / 8, 125, 70 };
+                SDL_RenderFillRect( gRenderer, &calcRect );
 
 		// Input Rect
 		SDL_SetRenderDrawColor( gRenderer, 0x00, 0xFF, 0x00, 0xFF );
@@ -642,16 +684,49 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
 		SDL_RenderDrawRect( gRenderer, &stateRect );
 
 		SDL_Rect marriedRect = { 3 * SCREEN_WIDTH / 4 - 5, SCREEN_HEIGHT / 8 + statusPromptTextTexture.getHeight(), 125, 35 };
-		SDL_RenderDrawRect( gRenderer, &marriedRect );
 
 		SDL_Rect singleRect = { 3 * SCREEN_WIDTH / 4 - 5, SCREEN_HEIGHT / 8 + statusPromptTextTexture.getHeight() + 35, 125, 35 };
-		SDL_RenderDrawRect( gRenderer, &singleRect );
+
+		if(status == 0){
+			SDL_RenderFillRect( gRenderer, &marriedRect );
+			SDL_RenderDrawRect( gRenderer, &singleRect );
+		}
+		else{
+                	SDL_RenderFillRect( gRenderer, &singleRect );
+			SDL_RenderDrawRect( gRenderer, &marriedRect );
+		}
 
 		if( x > (3 * SCREEN_WIDTH / 4 - 5) && x < (3 * SCREEN_WIDTH / 4 + 120) ){
-			if( y > (SCREEN_HEIGHT / 8 + statusPromptTextTexture.getHeight()) && y < (SCREEN_HEIGHT / 8 + statusPromptTextTexture.getHeight() + 35) )
-				SDL_RenderFillRect( gRenderer, &marriedRect );
-			else if( y > (SCREEN_HEIGHT / 8 + statusPromptTextTexture.getHeight() + 35) && y < (SCREEN_HEIGHT / 8 + statusPromptTextTexture.getHeight() + 70) )
-				SDL_RenderFillRect( gRenderer, &singleRect );
+			if( y > (SCREEN_HEIGHT / 8 + statusPromptTextTexture.getHeight()) && y < (SCREEN_HEIGHT / 8 + statusPromptTextTexture.getHeight() + 35) ){
+				status = 0;
+			}
+			else if( y > (SCREEN_HEIGHT / 8 + statusPromptTextTexture.getHeight() + 35) && y < (SCREEN_HEIGHT / 8 + statusPromptTextTexture.getHeight() + 70) ){
+				status = 1;
+			}
+		}
+
+		if( x > (SCREEN_WIDTH / 4) && x < SCREEN_WIDTH / 4 + 125 && y > 3 * SCREEN_HEIGHT / 8 && y < 3 * SCREEN_HEIGHT / 8 + 70){
+			setTaxOutput();
+		}
+
+		if( output == 1 ){
+			ifstream inFile;
+			inFile.open ("taxInfo.txt");
+
+			SDL_Color textColor = { 255, 255, 255 };
+
+			string word;
+			std::getline(inFile, word);
+			stateRateTextTexture.loadFromRenderedText( word, textColor );
+			std::getline(inFile, word);
+			fedRateTextTexture.loadFromRenderedText( word,textColor );
+			std::getline(inFile, word);
+			netIncomeTextTexture.loadFromRenderedText( word, textColor );
+			
+
+			stateRateTextTexture.render( 3 * SCREEN_WIDTH / 4, 3*SCREEN_HEIGHT / 8 );
+			fedRateTextTexture.render( 3 * SCREEN_WIDTH / 4,  5 *SCREEN_HEIGHT / 8 );
+			netIncomeTextTexture.render( 3 * SCREEN_WIDTH / 4,  7 * SCREEN_HEIGHT / 8 );
 		}
 
 		//Render text textures
@@ -662,8 +737,6 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
 		statusPromptTextTexture.render( 3 * SCREEN_WIDTH / 4, SCREEN_HEIGHT / 8 );
 		marriedInputTextTexture.render( 3 * SCREEN_WIDTH / 4,  SCREEN_HEIGHT / 8 + statusPromptTextTexture.getHeight() + 5 );
 		singleInputTextTexture.render( 3 * SCREEN_WIDTH / 4,  SCREEN_HEIGHT / 8 + statusPromptTextTexture.getHeight() + 45 );
-
-
 	}
 	else if( currentScreen == 2 )
 	{
@@ -842,8 +915,24 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
 	}
 	else if( currentScreen == 3 )
 	{
+//		output = 0;
+		//myUser.setInterestRate(interestRate);
+		myUser.setPrinciple(principle);
+		myUser.setMonths(months);
+		myUser.setType(loanType);
+	
+		if( loanType == 0 ){
+			myUser.setScholarship(scholarship);
+		}
+
 		loanScreenTextTexture.render( SCREEN_WIDTH / 2 - loanScreenTextTexture.getWidth() / 2 , 0 );
 
+		//calculate button
+                SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0xFF );
+                SDL_Rect calcRect = { SCREEN_WIDTH / 4, 500, 125, 70 };
+                SDL_RenderFillRect( gRenderer, &calcRect );
+
+                SDL_SetRenderDrawColor( gRenderer, 0x00, 0xFF, 0xFF, 0xFF );
                 SDL_Rect studRect = { ( SCREEN_WIDTH - mortInputTextTexture.getWidth() ) / 4 - 5, SCREEN_HEIGHT / 8 + newPromptTextTexture.getHeight(), 125, 35 };
                 SDL_RenderDrawRect( gRenderer, &studRect );
 
@@ -858,20 +947,50 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
 
 		SDL_Rect scholRect = { ( SCREEN_WIDTH - scholInputTextTexture.getWidth() ) / 4 - 5, 400 + scholPromptTextTexture.getHeight(), 125, 35 };
 
+		if( loanType == 0 ){
+			SDL_RenderFillRect( gRenderer, &studRect );
+			SDL_RenderDrawRect( gRenderer, &scholRect );
+			scholPromptTextTexture.render( ( SCREEN_WIDTH - scholPromptTextTexture.getWidth() ) / 4, 400 );
+			scholInputTextTexture.render( ( SCREEN_WIDTH - scholInputTextTexture.getWidth() ) / 4, 400 + scholPromptTextTexture.getHeight() );
+		}
+		else{
+                	SDL_RenderFillRect( gRenderer, &mortRect );
+		}
 
                 if( x > (( SCREEN_WIDTH - mortInputTextTexture.getWidth() ) / 4 - 5) && x < (( SCREEN_WIDTH - mortInputTextTexture.getWidth() ) / 4 + 120) ){
                         if( y > (SCREEN_HEIGHT / 8 + newPromptTextTexture.getHeight()) && y < (SCREEN_HEIGHT / 8 + newPromptTextTexture.getHeight() + 35) ){
-                                SDL_RenderFillRect( gRenderer, &studRect );
-				type = 0;
-				SDL_RenderDrawRect( gRenderer, &scholRect );
-			        scholPromptTextTexture.render( ( SCREEN_WIDTH - scholPromptTextTexture.getWidth() ) / 4, 400 );
-                		scholInputTextTexture.render( ( SCREEN_WIDTH - scholInputTextTexture.getWidth() ) / 4, 400 + scholPromptTextTexture.getHeight() );
+				loanType = 0;
 			}
                         else if( y > (SCREEN_HEIGHT / 8 + newPromptTextTexture.getHeight() + 35) && y < (SCREEN_HEIGHT / 8 + newPromptTextTexture.getHeight() + 70) ){
-                                SDL_RenderFillRect( gRenderer, &mortRect );
-                		type = 1;
+                		loanType = 1;
 			}
 		}
+
+		if( x > (SCREEN_WIDTH / 4) && x < SCREEN_WIDTH / 4 + 125 && y > 500 && y < 570){
+                        setTaxOutput();
+                }
+
+
+                if( output == 1 ){
+                        LTexture loanTableTextTexture[months+1];
+
+		        ifstream inFile;
+                        inFile.open ("loanInfo.txt");
+
+                        SDL_Color textColor = { 255, 255, 255 };
+
+                        string word;
+			for( int i = 0; i < months + 1; i++ ){
+                        	std::getline(inFile, word);
+                        	loanTableTextTexture[i].loadFromRenderedText( word, textColor );
+			}
+
+			for( int i = 0; i < months + 1; i++ ){
+
+                        	loanTableTextTexture[i].render( 3 * SCREEN_WIDTH / 4, 20 + ( SCREEN_HEIGHT - 50 ) / i );
+
+			}
+                }
 
 
 		//Render text textures
@@ -894,4 +1013,22 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
 
 	return currentScreen;
 
+}
+
+double SDL::getIncome(){
+	return income;
+}
+
+string SDL::getState(){
+	return state;
+}
+
+bool SDL::getStatus(){
+	return status;
+}
+
+void SDL::setTaxOutput(){
+
+	myUser.run();
+	output = 1;
 }
