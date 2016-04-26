@@ -38,19 +38,15 @@ Tax::Tax(double deduct){
     ifstream inFile2; 
     inFile2.open("marriedTaxes.data"); 
     temp.clear();  
-    while( !inFile2.eof()){
+    count =0; 
+    while( ! inFile2.eof()){
         getline(inFile2, line, ',');
-        temp.push_back(line); 
+        temp.push_back(line);
         count ++; 
         if (count ==6){
             marriedState.push_back(temp); 
             temp.clear(); 
             count =0; 
-        }
-    }
-    for(int i=0; i<marriedState.size(); i++){
-        for (int j=0; j<marriedState[i].size(); j++){
-            //cout<<marriedState[i][j]<<' '; 
         }
     }
     inFile2.close(); 
@@ -117,26 +113,19 @@ void Tax::calcItax(double income, string UserState, bool filingStatus){
     if (single){
         for(int i=0; i<singleState.size(); i++){
             if ((clean(singleState[i][0])) == state){
-                cout<<singleState[i][0]<<endl;  
-		row.push_back(singleState[i]); 
+		        row.push_back(singleState[i]); 
             }
         }
         
     }
     if (married){
         for (int k=0; k<marriedState.size(); k++){
-		if ((clean(marriedState[k][0])) == state){
+            if ((clean(marriedState[k][0])) == state){
                 row.push_back(marriedState[k]); 
             }
         }
     }
 
-    for(int i=0; i<row.size(); i++){
-        for(int j=0; j<row[i].size(); j++){ 
-            cout<<row[i][j]<<' '; 
-        }
-        cout<<' '; 
-    }
 
     
     //get state tax rate based on income
@@ -147,7 +136,6 @@ void Tax::calcItax(double income, string UserState, bool filingStatus){
     else{
     for(int i=0; i<size-1; i++){
         max = boost::lexical_cast<double>(row[size-1][2]);
-        cout<<max; 
         if (income >= max){
             stateRate=boost::lexical_cast<double>(row[size-1][1]); 
             break; 
@@ -302,3 +290,5 @@ void Tax::writeToFile(){
     myFile.close(); 
 
 }
+
+
