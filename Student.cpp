@@ -66,10 +66,10 @@ void Student::writeToFile(){
 
 	ofstream myFile; 
 	myFile.open("loanInfo.txt"); 
-	myFile<<"MONTH\tAMOUNT"<<endl; 
+	myFile<<"MONTH     AMOUNT"<<endl; 
 	for(int i=0; i<table.size(); i++){
 		for(int j=0; j<table[i].size(); j++){
-			myFile<<table[i][j]<<'\t';
+			myFile<<table[i][j]<<"          ";
 		}
 		myFile<<endl; 
 	}
