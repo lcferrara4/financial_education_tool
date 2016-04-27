@@ -214,7 +214,7 @@ string User::getTotalString( int i ){
 
 double User::calcStockTotal(){
 
-        //stockTotal = stock_buy - stock_sell; //amount of money made in stocks
+        //stockTotal = stock_sell - stock_buy; //amount of money made in stocks
 }
 
 double User::getStockPrice( int i ){
