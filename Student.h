@@ -5,12 +5,9 @@
 #include "Loan.h" 
 #include <iostream>
 
-//class Tax; 
-
 class Student : public Loan{
 
     friend ostream &operator<<(ostream&, const Student &S); 
-    //friend class Tax; 
 
     public:
         Student(); 
@@ -19,6 +16,7 @@ class Student : public Loan{
         setRate(ir);
         setMonths(month);
         setTax(t);
+        setScholar(scholar); 
         }
         void createPlan();
         void setScholar(double); 

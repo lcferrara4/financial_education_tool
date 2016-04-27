@@ -51,53 +51,17 @@ Tax::Tax(double deduct){
     }
     inFile2.close(); 
 
-    //initialize Federal Vectors
-    
-    ifstream inFile3; 
-    inFile3.open("singleFed.data"); 
-    temp.clear(); 
-    count=0; 
-    while (!inFile3.eof()){
-        getline(inFile3, line, ','); 
-        temp.push_back(line); 
-        count++; 
-        if (count == 2){
-            singleFed.push_back(temp); 
-            temp.clear(); 
-            count=0; 
-        }
-    }
-    count=0; 
-    inFile3.close();
-    
-    ifstream inFile4; 
-    inFile4.open("marriedFed.data"); 
-    temp.clear(); 
-    while (!inFile4.eof()){
-        getline(inFile4, line, ','); 
-        temp.push_back(line); 
-        count++; 
-        if (count==2){
-            marriedFed.push_back(temp); 
-            temp.clear(); 
-            count=0; 
-        }
-    }
-    inFile4.close(); 
-    
+   
 }
 
 void Tax::calcItax(double income, string UserState, bool filingStatus){
 
 
-	cout<<"CALCULATING TAX"<<endl; 
-
     state = clean(UserState); 
-    //cout<<"Enter state: ";
-        //cin>>state; 
-    //string state = "Arizona";
     bool married, single; 
-	if (filingStatus){
+	
+    //set filing status
+    if (filingStatus){
 		married = 0; 
 		single = 1; 
 	}
@@ -105,11 +69,10 @@ void Tax::calcItax(double income, string UserState, bool filingStatus){
 		married =1; 
 		single = 0; 
 	}
-     cout<<"FILINGSTATUS= "<<filingStatus<<endl; 
     vector<vector<string> > row;  
     double value, value2,max;  
 
-    //find state
+    //find state information for all incomes 
     if (single){
         for(int i=0; i<singleState.size(); i++){
             if ((clean(singleState[i][0])) == state){
@@ -151,122 +114,66 @@ void Tax::calcItax(double income, string UserState, bool filingStatus){
     }
     }
     //get federal state rate based on income  
-/*
-    for(int i=0; i<singleFed.size(); i++){
-        for(int j=0; j<singleFed[i].size(); j++){
-            cout<<singleFed[i][j]<<" "; 
-        }
-        cout<<endl; 
-    }
-*/
    if (single){
-        for(int i=0; i<singleFed.size()-1; i++){
-            //cout<<"inFed"; 
             if (income >=413200){//highest tax bracket
                 fedRate = .396; 
-                break;
             }
-           /* else{
-                value = boost::lexical_cast<double>(singleFed[i][1]); 
-                value2 = boost::lexical_cast<double>(singleFed[i+1][1]); 
-                cout<<value<<" "<<value2<<endl; 
-                    if (income >= value && income < value2){
-                        cout<<singleFed[i][0]; 
-                        fedRate = boost::lexical_cast<double>(singleFed[i][0]); 
-                        cout<<"after"; 
-                        break; 
-                    }
-            }
-            */
             else if(income >=411500 && income <413200){
                 fedRate = .35; 
-                break; 
             }
             else if(income <411500 && income >= 189300){
                 fedRate = .28;
-                break; 
             }
             else if (income<189300 && income >=90750){
                 fedRate = .25; 
-                break; 
             }
             else if(income < 90750 && income >=37450){
                 fedRate = .15; 
-                break; 
             }
             else if (income <37450 && income >=9225){
                 fedRate = .10; 
-                break; 
             }
             else{
                 fedRate = .05; 
-                break; 
-            } 
         }
     }
     else if (married){
-        for (int i=0; i<marriedFed.size()-1; i++){
             if (income >=464850){
                 fedRate = .396; 
-                break; 
             }
              else if(income >=411500 && income <464850){
                 fedRate = .35; 
-                break; 
             }
             else if(income <411500 && income >= 230450){
                 fedRate = .28;
-                break; 
             }
             else if (income<230450 && income >=151200){
                 fedRate = .25; 
-                break; 
             }
             else if(income < 151200 && income >=74900){
                 fedRate = .15; 
-                break; 
             }
             else if (income <74900 && income >=18450){
                 fedRate = .10; 
-                break; 
             }
             else{
                 fedRate = .05; 
-                break; 
             }
-            /*else if(income <=464850){
-                value=boost::lexical_cast<double>(marriedFed[i][1]); 
-                value2=boost::lexical_cast<double>(marriedFed[i+1][1]); 
-                if(income >= value && income <value2){
-                    fedRate=boost::lexical_cast<double>(marriedFed[i][0]);
-                    break; 
-                }
-            }*/
-
-        }
     }
 
+
+    //states that have rates based on federal rate
      if (state == "Colorado" || state == "Illinois" || state == "Michigan" || state == "Indiana"){
         stateRate = boost::lexical_cast<double>(row[0][1]); 
-        stateRate = stateRate * fedRate / 100; 
+        stateRate = stateRate * fedRate / 10; 
      }
-     //if (stateRate < .0000000000001){
-     //    stateRate = 0; 
-     //}
-
-    //CALCULATE INCOME TAX 
-     
+      
     double taxable; 
+    
     taxable = income - deductions;
-     
-    cout<<endl<<fedRate<<" is fed, state is: "<<stateRate<<endl; 
-
     netIncome = income -taxable*stateRate - taxable*fedRate; 
 
-    cout<<income<<" is your income"<<endl; 
-
-    
-    cout<<"Net income: "<<netIncome<<endl; 
+   
 }
 
 string Tax::clean(string state){
