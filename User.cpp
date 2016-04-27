@@ -17,6 +17,8 @@ User::User(){
 	months = 1;
 	scholarship = 0;
 	type = 0;
+	deductions = 0;
+
 /*
     cout<<"Enter Income: "; 
     cin>>income; 
@@ -37,8 +39,20 @@ User::User(double i, string s, bool stat, double in, double p, int m, double sch
 	type = t;
 }
 
-void User::run(){
+void User::runTax(){
 
+	cout<<"USER RUNNING"<<endl;
+
+	string state; 
+        cout<<"\nTAX INFORMATION";
+
+    Tax myTax(deductions);
+    myTax.calcItax(income,getState(), getStatus());
+    myTax.writeToFile(); 
+
+}
+
+void User::runLoan(){
     double mortDeduct, stuDeduct;
     double userIncome, deductions;
 
@@ -60,15 +74,7 @@ void User::run(){
 		cout<<myStu; 
 	}
 
-	cout<<"USER RUNNING"<<endl;
-
-	string state; 
-        cout<<"\nTAX INFORMATION";
     deductions = mortDeduct+stuDeduct+stockDeduct; 
-
-    Tax myTax(deductions);
-    myTax.calcItax(income,getState(), getStatus());
-    myTax.writeToFile(); 
 
 }
 

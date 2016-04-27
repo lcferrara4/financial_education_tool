@@ -11,7 +11,8 @@ class User{
     public: 
         User(); 
 	User(double, string, bool, double, double, int, double, bool);
-        void run(); 
+        void runTax();
+	void runLoan();
         void setStockDeduct(double);
         void setIncome(double);
 	void setState(string);
@@ -34,7 +35,5 @@ class User{
 	int months;
 	bool type;
 	double scholarship;
-        //Mortgage myMort;
-        //Tax myTax(double, double);
-        //Student myStu; 
+        double deductions;
 };

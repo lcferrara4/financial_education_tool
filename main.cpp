@@ -22,7 +22,7 @@ int main( int argc, char* args[]  ){
 	//instantiate
 	default_random_engine generator(time(0));
 	vector<stock> stocks;
-	vector<vector<double>> graphs;
+	vector<vector<double> > graphs;
 	//User myUser(mySDL.getIncome(), mySDL.getState(), mySDL.getStatus()); 
 	vector<string> stock_Names;
 
@@ -89,22 +89,19 @@ int main( int argc, char* args[]  ){
 		}
 	}
 
-	//graph stuff
+	vector<double> temp;
 
+	//graph stuff
 	for (int i = 0; i < 60; ++i)
 	{
-		graphs[i].push_back(stocks[i].recalc_price());
+		stocks[i].recalc_price();
+		temp.push_back( stocks[i].get_price() );
+		graphs.push_back(temp);
+		temp.clear();
 	}
 	
 	total = stock_buy - stock_sell; //amount of money made in stocks
     stock_buy = stock_buy * number_Stock; //amount of money currently in market
-	
-	/*
-	myUser.setStockDeduct(stock_buy); 
-    	myUser.setIncome(total); 
-	myUser.run(); 
-	*/
-
 
 }
 

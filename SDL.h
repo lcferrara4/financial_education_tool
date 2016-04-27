@@ -42,12 +42,14 @@ class SDL
 		bool getStatus();
 		bool getTaxOutput();
 
+
 		string getType();
 		double getPrinciple();
 		int getMonths();
 		double getScholarship();
 		
 		void setTaxOutput();
+		void setLoanOutput();
 	private:
 		//Buttons objects
 		LButton gButtons[ TOTAL_BUTTONS ];
@@ -83,6 +85,8 @@ class SDL
 
 		//Loan Screen Rendered Textures
 		LTexture loanScreenTextTexture;
+		LTexture ratePromptTextTexture;
+		LTexture rateInputTextTexture;
 		LTexture princPromptTextTexture;
 		LTexture princInputTextTexture;
 		LTexture monthPromptTextTexture;
@@ -96,12 +100,15 @@ class SDL
 		//Planner Screen Rendered Textures
 		LTexture plannerScreenTextTexture;
 
+		LTexture calcButtonTextTexture;
+
 		string state;
 		int income;
 		int type;
 		bool status;
 		User myUser;
 		bool output;
+		bool loanOutput;
 		double interestRate;
 		double principle;
 		int months;
@@ -245,6 +252,7 @@ bool SDL::loadMedia()
                 plannerScreenTextTexture.loadFromRenderedText( "YOUR PLAN", textColor );
                 spTextTexture.loadFromRenderedText( "ND 60", textColor );
 
+		ratePromptTextTexture.loadFromRenderedText( "Interest Rate:", textColor );
 		princPromptTextTexture.loadFromRenderedText( "Principle:", textColor );
                 monthPromptTextTexture.loadFromRenderedText( "Months:", textColor );
                 newPromptTextTexture.loadFromRenderedText( "New Loan:", textColor );
@@ -257,6 +265,8 @@ bool SDL::loadMedia()
                 statusPromptTextTexture.loadFromRenderedText( "Status:", textColor );
                 marriedInputTextTexture.loadFromRenderedText( "Married", textColor );
                 singleInputTextTexture.loadFromRenderedText( "Single", textColor );
+
+		calcButtonTextTexture.loadFromRenderedText("Calculate", textColor);
 	}
 
 
@@ -278,6 +288,8 @@ void SDL::close()
         stockScreenTextTexture.free();
         plannerScreenTextTexture.free();
 
+	ratePromptTextTexture.free();
+	rateInputTextTexture.free();
 	princPromptTextTexture.free();
 	princInputTextTexture.free();
         monthPromptTextTexture.free();
@@ -295,6 +307,8 @@ void SDL::close()
 	statusPromptTextTexture.free();
         marriedInputTextTexture.free();
         singleInputTextTexture.free();
+
+	calcButtonTextTexture.free();
 
 	for( int i = 0; i < 50; i++ ){
 		stocksTextTexture[i].free();
@@ -356,7 +370,10 @@ int SDL::handleEvents()
                         SDL_Color textColor = { 0, 250, 250, 0xFF };
 
                         //The current input text.
-                        std::string inputText = "20000";
+                        std::string rateText = "2";
+                        rateInputTextTexture.loadFromRenderedText( rateText.c_str(), textColor ); 
+
+	                std::string inputText = "20000";
                         princInputTextTexture.loadFromRenderedText( inputText.c_str(), textColor );
 
                         std::string monthText = "1";
@@ -380,7 +397,7 @@ int SDL::handleEvents()
 			//While application is running
 			while( !quit )
 			{
-
+				bool renderRateText = false;
 				bool renderText = false;
 				bool renderMonthText = false;
 				bool renderTaxText = false;
@@ -423,14 +440,20 @@ int SDL::handleEvents()
 							}
                                                         //lop off character - loan screen
                                                         else if( currentScreen == 3 ){
-								if( inputText.length() > 0 && y < 150 ){
-                                                        		inputText = inputText.substr(0, inputText.size() - 1);
-                                                        		renderText = true;
-								}
-								if( monthText.length() > 0 && y >= 150 ){
-                                                                        monthText = monthText.substr(0, monthText.size() - 1);
-                                                                        renderMonthText = true;
-								}
+                                                                if( x > ( SCREEN_WIDTH - princPromptTextTexture.getWidth() ) / 4 - 5 && x < ( SCREEN_WIDTH - princPromptTextTexture.getWidth() ) / 4 + 120 ){
+                                                                        if( inputText.length() > 0 && y > 200 + princPromptTextTexture.getHeight() && y < 235 + princPromptTextTexture.getHeight() ){                                                           
+                                                        			inputText = inputText.substr(0, inputText.size() - 1);
+                                                                                renderText = true;
+                                                                        }
+                                                                        else if( monthText.length() > 0 && y > 300 + monthPromptTextTexture.getHeight() && y < 335 + monthPromptTextTexture.getHeight() ){
+                                                                        	monthText = monthText.substr(0, monthText.size() - 1);
+                                                                                renderMonthText = true;
+                                                                        }
+                                                                        else if( rateText.length() > 0 && y > 400 + ratePromptTextTexture.getHeight() && y < 435 + ratePromptTextTexture.getHeight() ){
+                                                                        	rateText = rateText.substr(0, rateText.size() - 1);
+                                                                                renderRateText = true;
+                                                                        }
+                                                                }
 							}
                                                 }
                                                 //Handle copy
@@ -449,10 +472,18 @@ int SDL::handleEvents()
 
 							}
 							else if( currentScreen == 3 ){
-								if( y < 150 )
-                                                        		SDL_SetClipboardText( inputText.c_str() );
-                                                		else
-									SDL_SetClipboardText( monthText.c_str() );
+				                        	if( x > ( SCREEN_WIDTH - princPromptTextTexture.getWidth() ) / 4 - 5 && x < ( SCREEN_WIDTH - princPromptTextTexture.getWidth() ) / 4 + 120 ){
+                                                                        if( y > 200 + princPromptTextTexture.getHeight() && y < 235 + princPromptTextTexture.getHeight() ){                                                           
+                                                        			SDL_SetClipboardText( inputText.c_str() );
+                                                                        }
+                                                                        else if( y > 300 + monthPromptTextTexture.getHeight() && y < 335 + monthPromptTextTexture.getHeight() ){
+										SDL_SetClipboardText( monthText.c_str() );
+                                                                        }
+                                                                        else if( y > 400 + ratePromptTextTexture.getHeight() && y < 435 + ratePromptTextTexture.getHeight() ){
+										SDL_SetClipboardText( rateText.c_str() );
+                                                                        }
+                                                                }
+	
 							}
 						}
                                                 //Handle paste
@@ -471,13 +502,19 @@ int SDL::handleEvents()
 								}
 							}
 							else if( currentScreen == 3 ){
-								if( y < 150 ){
-                                                        		inputText = SDL_GetClipboardText();
-                                                        		renderText = true;
-								}
-								else{
-                                                                        monthText = SDL_GetClipboardText();
-                                                                        renderMonthText = true;
+                                                                if( x > ( SCREEN_WIDTH - princPromptTextTexture.getWidth() ) / 4 - 5 && x < ( SCREEN_WIDTH - princPromptTextTexture.getWidth() ) / 4 + 120 ){
+                                                                        if( y > 200 + princPromptTextTexture.getHeight() && y < 235 + princPromptTextTexture.getHeight() ){
+                                                        			inputText = SDL_GetClipboardText();
+                                                                                renderText = true;
+                                                                        }
+                                                                        else if( y > 300 + monthPromptTextTexture.getHeight() && y < 335 + monthPromptTextTexture.getHeight() ){
+                                                                        	monthText = SDL_GetClipboardText();
+                                                                                renderMonthText = true;
+                                                                        }
+                                                                        else if( y > 400 + ratePromptTextTexture.getHeight() && y < 435 + ratePromptTextTexture.getHeight() ){
+                                                                        	rateText = SDL_GetClipboardText();
+                                                                                renderRateText = true;
+                                                                        }
 								}
 							}
                                                 }
@@ -502,13 +539,19 @@ int SDL::handleEvents()
 							}
 							else if( currentScreen == 3 ){
                                                         	//Append character
-								if( y < 150 ){
-                                                        		inputText += e.text.text;
-                                                        		renderText = true;
-								}
-								else{
-                                                                        monthText += e.text.text;
-                                                                        renderMonthText = true;
+                                                        	if( x > ( SCREEN_WIDTH - princPromptTextTexture.getWidth() ) / 4 - 5 && x < ( SCREEN_WIDTH - princPromptTextTexture.getWidth() ) / 4 + 120 ){
+									if( y > 200 + princPromptTextTexture.getHeight() && y < 235 + princPromptTextTexture.getHeight() ){
+                                                        			inputText += e.text.text;
+                                                        			renderText = true;
+									}
+									else if( y > 300 + monthPromptTextTexture.getHeight() && y < 335 + monthPromptTextTexture.getHeight() ){
+                                                                        	monthText += e.text.text;
+                                                                        	renderMonthText = true;
+									}
+									else if( y > 400 + ratePromptTextTexture.getHeight() && y < 435 + ratePromptTextTexture.getHeight() ){
+										rateText += e.text.text;
+										renderRateText = true;
+									}
 								}
 							}
                                                 }
@@ -522,6 +565,25 @@ int SDL::handleEvents()
 							currentScreen = i;
 					}
 				}	
+
+				// Rerender rate text if needed
+				if( renderRateText )
+                                {
+                                        //Text is not empty 
+                                        if( rateText != "" )
+                                        {
+                                                interestRate = boost::lexical_cast<double>(rateText);
+                                                //Render new text
+                                                rateInputTextTexture.loadFromRenderedText( rateText.c_str(), textColor );
+                                        }
+                                        //Text is empty
+                                        else
+                                        {
+                                                //Render space texture
+                                                rateInputTextTexture.loadFromRenderedText( " ", textColor );
+                                        }
+                                }
+
 
 			      	//Rerender text if needed
 			      	if( renderText )
@@ -915,6 +977,7 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
 	}
 	else if( currentScreen == 3 )
 	{
+		loanOutput = 0;
 //		output = 0;
 		//myUser.setInterestRate(interestRate);
 		myUser.setPrinciple(principle);
@@ -942,8 +1005,11 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
                 SDL_Rect princRect = { ( SCREEN_WIDTH - princPromptTextTexture.getWidth() ) / 4 - 5, 200 + princPromptTextTexture.getHeight(), 125, 35 };
                 SDL_RenderDrawRect( gRenderer, &princRect );
 
-                SDL_Rect monthRect = { ( SCREEN_WIDTH - monthPromptTextTexture.getWidth() ) / 4 - 5, 300 + monthPromptTextTexture.getHeight(), 125, 35 };
+                SDL_Rect monthRect = { ( SCREEN_WIDTH - princPromptTextTexture.getWidth() ) / 4 - 5, 300 + monthPromptTextTexture.getHeight(), 125, 35 };
                 SDL_RenderDrawRect( gRenderer, &monthRect );
+
+                SDL_Rect rateRect = { ( SCREEN_WIDTH - princPromptTextTexture.getWidth() ) / 4 - 5, 400 + ratePromptTextTexture.getHeight(), 125, 35 };
+                SDL_RenderDrawRect( gRenderer, &rateRect );
 
 		SDL_Rect scholRect = { ( SCREEN_WIDTH - scholInputTextTexture.getWidth() ) / 4 - 5, 400 + scholPromptTextTexture.getHeight(), 125, 35 };
 
@@ -967,11 +1033,11 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
 		}
 
 		if( x > (SCREEN_WIDTH / 4) && x < SCREEN_WIDTH / 4 + 125 && y > 500 && y < 570){
-                        setTaxOutput();
-                }
+                        setLoanOutput();
+		}
 
 
-                if( output == 1 ){
+                if( loanOutput == 1 ){
                         LTexture loanTableTextTexture[months+1];
 
 		        ifstream inFile;
@@ -987,7 +1053,7 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
 
 			for( int i = 0; i < months + 1; i++ ){
 
-                        	loanTableTextTexture[i].render( 3 * SCREEN_WIDTH / 4, 20 + ( SCREEN_HEIGHT - 50 ) / i );
+                        	loanTableTextTexture[i].render( 3 * SCREEN_WIDTH / 4, SCREEN_HEIGHT / (i+1) );
 
 			}
                 }
@@ -995,22 +1061,188 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
 
 		//Render text textures
 		princPromptTextTexture.render( ( SCREEN_WIDTH - princPromptTextTexture.getWidth() ) / 4, 200 );
-		princInputTextTexture.render( ( SCREEN_WIDTH - princInputTextTexture.getWidth() ) / 4, 200 + princPromptTextTexture.getHeight() );
+		princInputTextTexture.render( ( SCREEN_WIDTH - princInputTextTexture.getWidth() ) / 4, 205 + princPromptTextTexture.getHeight() );
 
 		monthPromptTextTexture.render( ( SCREEN_WIDTH - monthPromptTextTexture.getWidth() ) / 4, 300 );
-		monthInputTextTexture.render( ( SCREEN_WIDTH - monthInputTextTexture.getWidth() ) / 4, 300 + monthPromptTextTexture.getHeight() );
+		monthInputTextTexture.render( ( SCREEN_WIDTH - monthInputTextTexture.getWidth() ) / 4, 305 + monthPromptTextTexture.getHeight() );
 
 		newPromptTextTexture.render( ( SCREEN_WIDTH - newPromptTextTexture.getWidth() ) / 4, SCREEN_HEIGHT / 8 );
 		studInputTextTexture.render( ( SCREEN_WIDTH - studInputTextTexture.getWidth() ) / 4, SCREEN_HEIGHT / 8 + newPromptTextTexture.getHeight() + 5 );
                 mortInputTextTexture.render( ( SCREEN_WIDTH - mortInputTextTexture.getWidth() ) / 4, SCREEN_HEIGHT / 8 + newPromptTextTexture.getHeight() + 40 );
+
+	        ratePromptTextTexture.render( ( SCREEN_WIDTH - ratePromptTextTexture.getWidth() ) / 4, 400 );
+                rateInputTextTexture.render( ( SCREEN_WIDTH - rateInputTextTexture.getWidth() ) / 4, 405 + ratePromptTextTexture.getHeight() );
+
 	}
 	else if( currentScreen == 4 )
 	{
 		plannerScreenTextTexture.render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
 	}
+	else if( currentScreen >= 50 && currentScreen <= 110 ){
+                stocksTextTexture[currentScreen-50].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+
+                SDL_Rect princRect = { ( SCREEN_WIDTH - princPromptTextTexture.getWidth() ) / 4 - 5, 200 + princPromptTextTexture.getHeight(), 125, 35 };
+                SDL_RenderDrawRect( gRenderer, &princRect );
+
+                SDL_Rect monthRect = { ( SCREEN_WIDTH - princPromptTextTexture.getWidth() ) / 4 - 5, 300 + monthPromptTextTexture.getHeight(), 125, 35 };
+                SDL_RenderDrawRect( gRenderer, &monthRect );
 
 
 
+
+	}
+/*
+        else if( currentScreen == 51 ){ 
+                stocksTextTexture[1].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 52 ){ 
+                stocksTextTexture[2].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 53 ){ 
+                stocksTextTexture[3].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 54 ){ 
+                stocksTextTexture[4].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+	else if( currentScreen == 55 ){
+                stocksTextTexture[5].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+	}
+        else if( currentScreen == 56 ){ 
+                stocksTextTexture[6].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+	else if( currentScreen == 50 ){
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+	}
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+	else if( currentScreen == 50 ){
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+	}
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+	else if( currentScreen == 50 ){
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+	}
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+	else if( currentScreen == 50 ){
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+	}
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+	else if( currentScreen == 50 ){
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+	}
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+	else if( currentScreen == 50 ){
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+	}
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+	else if( currentScreen == 50 ){
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+	}
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+	else if( currentScreen == 50 ){
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+	}
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){ 
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+        else if( currentScreen == 50 ){
+                stocksTextTexture[0].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        }
+*/
 	return currentScreen;
 
 }
@@ -1029,6 +1261,11 @@ bool SDL::getStatus(){
 
 void SDL::setTaxOutput(){
 
-	myUser.run();
+	myUser.runTax();
 	output = 1;
+}
+
+void SDL::setLoanOutput(){
+	myUser.runLoan();
+	loanOutput = 1;
 }
