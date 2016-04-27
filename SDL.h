@@ -38,8 +38,6 @@ class SDL
 		void setTaxOutput();
 		void setLoanOutput();
 		void Transaction(int,int,int);
-		void printTaxOutput();
-		void getStockScreenPrices();
 		void displayAmortization();
 
 		string convertToString(double);
@@ -566,6 +564,8 @@ int SDL::handleEvents()
                                         {
 						//Handle enter
 						if( e.key.keysym.sym == SDLK_RETURN ){
+                                                	buy = boost::lexical_cast<int>(buyText);
+							sell = boost::lexical_cast<int>(sellText);
 							enter = 1;
                         				sellText = "0";
                         				buyText = "0";
@@ -900,7 +900,6 @@ int SDL::handleEvents()
                                         //Text is not empty 
                                         if( buyText != "" )
                                         {
-                                                buy = boost::lexical_cast<int>(buyText);
                                                 //Render new text
                                                 buyInputTextTexture.loadFromRenderedText( buyText.c_str(), textColor );
                                         }
@@ -917,7 +916,6 @@ int SDL::handleEvents()
                                         //Text is not empty 
                                         if( sellText != "" )
                                         {
-                                                sell = boost::lexical_cast<int>(sellText);
                                                 //Render new text
                                                 sellInputTextTexture.loadFromRenderedText( sellText.c_str(), textColor );
                                         }
@@ -1052,7 +1050,33 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
 
 		// want output displayed
 		if( output == 1 ){
-			printTaxOutput();
+				
+			ifstream inFile;
+			inFile.open ("taxInfo.txt");
+
+			SDL_Color textColor = { 255, 255, 255 };
+
+			string word;
+			std::getline(inFile, word);
+			stateRateTextTexture.loadFromRenderedText( word, textColor );
+			std::getline(inFile, word);
+			fedRateTextTexture.loadFromRenderedText( word,textColor );
+			std::getline(inFile, word);
+			netIncomeTextTexture.loadFromRenderedText( word, textColor );
+
+			string taxable = convertToString(myUser.getTaxable());
+			taxableIncomeTextTexture.loadFromRenderedText(taxable, textColor);
+
+			taxablePromptTextTexture.render( SCREEN_WIDTH / 4, 3 * SCREEN_HEIGHT / 8 );
+			taxableIncomeTextTexture.render( SCREEN_WIDTH / 4, 3 * SCREEN_HEIGHT / 8 + taxablePromptTextTexture.getHeight() + 5 );
+
+			stateRatePromptTextTexture.render(SCREEN_WIDTH /2, 3*SCREEN_HEIGHT / 8 );
+			stateRateTextTexture.render( 3 * SCREEN_WIDTH / 4, 3*SCREEN_HEIGHT / 8 );
+			fedRateTextTexture.render( 3 * SCREEN_WIDTH / 4,  5 *SCREEN_HEIGHT / 8 );
+			fedRatePromptTextTexture.render( SCREEN_WIDTH / 2,  5 *SCREEN_HEIGHT / 8 );
+			netIncomePromptTextTexture.render( SCREEN_WIDTH / 2,  7 * SCREEN_HEIGHT / 8 );
+			netIncomeTextTexture.render( 3 * SCREEN_WIDTH / 4,  7 * SCREEN_HEIGHT / 8 );
+
 		}
 
 		//Render text textures
@@ -1083,7 +1107,23 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
 		}
 
 		// print prices in table
-		getStockScreenPrices();
+			string price;
+
+			TTF_CloseFont( gFont );
+			gFont = TTF_OpenFont( "fonts/cooper_light.ttf", 12 );
+			SDL_Color textColor = { 0, 255, 0 };
+
+			for( int i = 0; i < 60; i ++ ){
+				price = convertToString( myUser.getStockPrice(i) );
+				priceScreenTextTexture[i].loadFromRenderedText( price, textColor );
+			}
+
+			TTF_CloseFont( gFont );
+			gFont = TTF_OpenFont( "fonts/sans_serif_nb.ttf", 28 );
+			textColor = { 255, 255, 255 };
+
+			price = convertToString( myUser.getSP(time) );
+			spAmountTextTexture.loadFromRenderedText( price, textColor);
 
 		// print table
 		for( int i = 0; i < 12; i++ ){
@@ -1427,8 +1467,6 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
 			enter = 0;
                         Transaction( currentScreen - 50, buy, sell );
 			textColor = { 0, 255, 255 };
-			buy = 0;
-			sell = 0;
 		}
                 if( increment ){
 			increment = 0;
@@ -1517,57 +1555,6 @@ string SDL::convertToString(double d){
 
 	convert << d;
 	return convert.str();
-}
-
-void SDL::printTaxOutput(){
-	ifstream inFile;
-	inFile.open ("taxInfo.txt");
-
-	SDL_Color textColor = { 255, 255, 255 };
-
-	string word;
-	std::getline(inFile, word);
-	stateRateTextTexture.loadFromRenderedText( word, textColor );
-	std::getline(inFile, word);
-	fedRateTextTexture.loadFromRenderedText( word,textColor );
-	std::getline(inFile, word);
-	netIncomeTextTexture.loadFromRenderedText( word, textColor );
-
-	string taxable = convertToString(myUser.getTaxable());
-	taxableIncomeTextTexture.loadFromRenderedText(taxable, textColor);
-
-	taxablePromptTextTexture.render( SCREEN_WIDTH / 4, 3 * SCREEN_HEIGHT / 8 );
-	taxableIncomeTextTexture.render( SCREEN_WIDTH / 4, 3 * SCREEN_HEIGHT / 8 + taxablePromptTextTexture.getHeight() + 5 );		
-
-	stateRatePromptTextTexture.render(SCREEN_WIDTH /2, 3*SCREEN_HEIGHT / 8 );
-	stateRateTextTexture.render( 3 * SCREEN_WIDTH / 4, 3*SCREEN_HEIGHT / 8 );
-	fedRateTextTexture.render( 3 * SCREEN_WIDTH / 4,  5 *SCREEN_HEIGHT / 8 );
-	fedRatePromptTextTexture.render( SCREEN_WIDTH / 2,  5 *SCREEN_HEIGHT / 8 );
-	netIncomePromptTextTexture.render( SCREEN_WIDTH / 2,  7 * SCREEN_HEIGHT / 8 );
-	netIncomeTextTexture.render( 3 * SCREEN_WIDTH / 4,  7 * SCREEN_HEIGHT / 8 );
-	
-}
-
-void SDL::getStockScreenPrices(){
-
-	string price;
-
-	TTF_CloseFont( gFont );
-	gFont = TTF_OpenFont( "fonts/cooper_light.ttf", 12 );
-	SDL_Color textColor = { 0, 255, 0 };
-
-	for( int i = 0; i < 60; i ++ ){
-		price = convertToString( myUser.getStockPrice(i) );
-		priceScreenTextTexture[i].loadFromRenderedText( price, textColor );
-	}
-
-	TTF_CloseFont( gFont );
-	gFont = TTF_OpenFont( "fonts/sans_serif_nb.ttf", 28 );
-	textColor = { 255, 255, 255 };
-
-	price = convertToString( myUser.getSP(time) );
-	spAmountTextTexture.loadFromRenderedText( price, textColor);
-
 }
 
 void SDL::displayAmortization(){
