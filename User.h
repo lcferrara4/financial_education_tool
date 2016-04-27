@@ -41,6 +41,8 @@ class User{
 	double getGraphPrice(int, int);
 	double getSP(int);
 	double getTaxable();
+	double getTotalBought();
+	double getTotalSold();
     private:
 	// tax variables
         bool status; 
@@ -57,8 +59,10 @@ class User{
 	double scholarship;
         double deductions;
 	// stock variables
-	double stockPrice;
-	double stockTotal;
+	//double stockPrice;
+	//double stockTotal;
+	double totalBought;
+	double totalSold;
 	int total[60];
         vector<stock> stocks;
         vector<vector<double> > graphs;

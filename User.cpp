@@ -25,7 +25,8 @@ User::User(){
 	stuDeduct=0; 
 	stockDeduct=0; 
 
-	stockTotal = 0;
+	totalSold = 0;
+	totalBought = 0;
 
 	for( int i = 0; i < 60; i++ ){
 		total[i] = 0;
@@ -200,6 +201,9 @@ void User::stockTransaction(int i, int buy, int sell){
         double stock_sell = sell * stocks[i].get_price();
 	total[i] = total[i] + buy - sell;
 
+	totalBought = totalBought + stock_buy;
+	totalSold = totalSold + stock_sell;
+
 	setStockDeduct(total[i]*stocks[i].get_price() ); 
 	recalcIncome(stock_sell, stock_buy); 
 	
@@ -213,8 +217,7 @@ string User::getTotalString( int i ){
 }
 
 double User::calcStockTotal(){
-
-        //stockTotal = stock_sell - stock_buy; //amount of money made in stocks
+        return totalSold - totalBought; //amount of money made in stocks
 }
 
 double User::getStockPrice( int i ){
@@ -248,3 +251,12 @@ void User::stockRecalc(int time){
 double User::getTaxable(){
 	return income - deductions;
 }
+
+double User::getTotalBought(){
+	return totalBought;
+}
+
+double User::getTotalSold(){
+        return totalSold;
+}
+

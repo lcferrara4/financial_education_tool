@@ -124,8 +124,15 @@ class SDL
 		LTexture scholPromptTextTexture;
 		LTexture scholInputTextTexture;
 
-		//Planner Screen Rendered Textures
+		//Overview Screen Rendered Textures
 		LTexture plannerScreenTextTexture;
+		LTexture amountSpentTextTexture;
+		LTexture amountMadeTextTexture;
+		LTexture totalMadeTextTexture;
+                LTexture totalBoughtTextTexture;
+                LTexture totalSoldTextTexture;
+                LTexture totalStockTextTexture;
+
 
 
 		LTexture spaceTextTexture;
@@ -326,6 +333,11 @@ bool SDL::loadMedia()
 		fedRatePromptTextTexture.loadFromRenderedText( "Federal Rate:", textColor);
 
 		calcButtonTextTexture.loadFromRenderedText("Calculate", textColor);
+
+		// Overview page
+                amountSpentTextTexture.loadFromRenderedText( "Amount Spent Buying Stocks:", textColor);
+                amountMadeTextTexture.loadFromRenderedText( "Amount Made Selling Stocks:", textColor);
+                totalMadeTextTexture.loadFromRenderedText( "Total Income from Stocks:", textColor);
 	
 		buyTextTexture.loadFromRenderedText("Buy", textColor);
 		sellTextTexture.loadFromRenderedText("Sell", textColor);
@@ -400,6 +412,13 @@ void SDL::close()
 
 	taxableIncomeTextTexture.free();
 	taxablePromptTextTexture.free();
+
+	amountSpentTextTexture.free();
+	amountMadeTextTexture.free();
+	totalMadeTextTexture.free();
+        totalBoughtTextTexture.free();
+        totalSoldTextTexture.free();
+        totalStockTextTexture.free();
 
 	for( int i = 0; i < 60; i++ ){
 		stocksTextTexture[i].free();
@@ -554,10 +573,13 @@ int SDL::handleEvents()
 						//Handle enter
 						if( e.key.keysym.sym == SDLK_RETURN ){
 							enter = 1;
+                        				sellText = "0";
+                        				sellInputTextTexture.loadFromRenderedText( sellText.c_str(), textColor );
+                        				buyText = "0";
+                        				buyInputTextTexture.loadFromRenderedText( buyText.c_str(), textColor );
 						}
 						//Handle space
 						else if( e.key.keysym.sym == SDLK_RIGHT ){
-							//&& ( currentScreen == 2 || (currentScreen >=50 && currentScreen <=110)) ){
 							increment = 1;
 						}
                                                 //Handle backspace
@@ -887,7 +909,7 @@ int SDL::handleEvents()
                                         else
                                         {
                                                 //Render space texture
-                                                buyInputTextTexture.loadFromRenderedText( " ", textColor );
+                                                buyInputTextTexture.loadFromRenderedText( "", textColor );
                                         }
 
 				}
@@ -904,7 +926,7 @@ int SDL::handleEvents()
                                         else
                                         {
                                                 //Render space texture
-                                                sellInputTextTexture.loadFromRenderedText( " ", textColor );
+                                                sellInputTextTexture.loadFromRenderedText( "", textColor );
                                         }
 				}
 				//Clear screen
@@ -1412,6 +1434,27 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
 	else if( currentScreen == 4 )
 	{
 		plannerScreenTextTexture.render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+        		
+		amountSpentTextTexture.render(SCREEN_WIDTH / 4, 100 );
+		amountMadeTextTexture.render(SCREEN_WIDTH / 4, 200 );
+		totalMadeTextTexture.render(SCREEN_WIDTH / 4, 300 );
+
+       	 	SDL_Color textColor = { 0, 255, 255 };
+
+		string totalBought = convertToString( myUser.getTotalBought() );
+		totalBoughtTextTexture.loadFromRenderedText( totalBought, textColor );
+                
+		string totalSold = convertToString(myUser.getTotalSold());
+                totalSoldTextTexture.loadFromRenderedText( totalSold, textColor);
+
+		string total = convertToString( myUser.calcStockTotal() );
+		totalStockTextTexture.loadFromRenderedText( total, textColor );
+
+		totalBoughtTextTexture.render(3 * SCREEN_WIDTH / 4, 100 );
+		totalSoldTextTexture.render(3 * SCREEN_WIDTH / 4, 200 );
+		totalStockTextTexture.render(3 * SCREEN_WIDTH / 4, 300 );
+
+
 	}
 	else if( currentScreen >= 50 && currentScreen <= 109 ){
 		stockOutput = 0;
@@ -1458,6 +1501,12 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
                 if( enter ){
 			enter = 0;
                         Transaction( currentScreen - 50, buy, sell );
+			textColor = { 0, 255, 255 };
+			buy = 0;
+			sell = 0;
+			//sellInputTextTexture.loadFromRenderedText( "0", textColor );
+			//buyInputTextTexture.loadFromRenderedText( "0", textColor );
+			//textColor = { 255, 255, 255 };
 		}
                 if( increment ){
 			increment = 0;
@@ -1503,7 +1552,7 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
                         y++;
                 }
 
-/*                if( increment ){
+                if( increment ){
 			increment = 0;
 			SDL_Rect clearRect = { SCREEN_WIDTH / 2 + 1, SCREEN_HEIGHT / 8, 539, 449 };
 			SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0xFF );
@@ -1511,7 +1560,7 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
 			time++;
 			myUser.stockRecalc(time);
 		}
-*/
+
 		SDL_SetRenderDrawColor( gRenderer, 0x00, 0xFF, 0xFF, 0xFF );
 
                 for( int i = 0; i < time; i++ ){
