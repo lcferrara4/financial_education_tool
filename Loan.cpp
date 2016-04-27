@@ -6,25 +6,7 @@ using namespace std;
 
 Loan::Loan(){
 
-   /* double rate, princ, months; 
-    bool tax; 
-    
-    cout<<"Enter interest rate: "<<endl; 
-    cin>>rate;
-    cout<<"Is this lona tax dectible? ( 0 for no 1 for yes)"<<endl; 
-    cin>>tax; 
-    cout<<"What is the principal?"<<endl; 
-    cin>>princ; 
-    cout<<"In how many months would you like to be debt free?"<<endl; 
-    cin>>months; 
 
-    setRate(rate); 
-    setTax(tax); 
-    setMonths(months); 
-    setPrinc(princ); 
-
-     
-*/
 }
 
 
