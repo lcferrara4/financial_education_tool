@@ -9,19 +9,10 @@ using namespace std;
 
 Student::Student(){
     double tuit, scholar; 
-    cout<<"Do you have any scholarships?  How much?"; 
-    cin>>scholar; 
     setScholar(scholar); 
 }
 
-/*Student::Student(double iRate, bool t, double pr, double mont, double schol){
-    setPrinc(pr); 
-    setTax(t); 
-    setMonths(mont); 
-    setRate(iRate); 
-    setScholar(schol);
-}
-*/
+
 
 void Student::setScholar(double s){
     scholarship=s; 
@@ -31,7 +22,6 @@ void Student::setScholar(double s){
 void Student::createPlan(){
     double total; 
     total = getPrinc() - scholarship; 
-
     double currMonth = 1; 
     double months = getMonths(); 
     double monthlyPayment = total / months; // ASSUMES NO INTEREST RATE

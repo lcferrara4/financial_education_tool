@@ -102,11 +102,10 @@ User::User(){
 
 void User::runTax(){
 
-	cout<<"USER RUNNING"<<endl;
 
 	string state; 
-        cout<<"\nTAX INFORMATION";
 
+    //calculate total deductions
 	deductions = mortDeduct + stuDeduct + stockDeduct; 
     Tax myTax(deductions);
     myTax.calcItax(income,getState(), getStatus());
@@ -118,22 +117,22 @@ void User::runLoan(){
     
     double userIncome, deductions;
 
+    //type = True for Mortgage 
+    //type = False for Student Loan
 	if( type ){
     		Mortgage myMort(interestRate, 1, principle, months); 
 	    	mortDeduct = myMort.getPrinc();   
-		stuDeduct = 0;
+		    stuDeduct = 0;
 	    	myMort.amortize();
-		myMort.writeToFile();  
-	    	cout<<myMort; 
+		    myMort.writeToFile();  
 	}
 	else{  
+        //student loan has no interest rate
     		Student myStu(interestRate, 1, principle, months, scholarship);
-		stuDeduct = myStu.getPrinc();
-		mortDeduct = 0;
-    		cout<<"\nSTUDENT LOAN PLAN"<<endl; 
+	    	stuDeduct = myStu.getPrinc();
+		    mortDeduct = 0;
     		myStu.createPlan(); 
     		myStu.writeToFile(); 
-		cout<<myStu; 
 	}
 
     deductions = mortDeduct+stuDeduct+stockDeduct; 

@@ -59,8 +59,6 @@ class User{
 	double scholarship;
         double deductions;
 	// stock variables
-	//double stockPrice;
-	//double stockTotal;
 	double totalBought;
 	double totalSold;
 	int total[60];

@@ -23,7 +23,6 @@ class Tax{
         void calcItax(double, string, bool); 
         void writeToFile(); 
     private:
-        //double income; 
         string state; 
         double stateRate; 
         double fedRate; 
