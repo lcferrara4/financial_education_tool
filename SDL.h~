@@ -969,8 +969,8 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
 
 			stateRatePromptTextTexture.render(SCREEN_WIDTH /2, 3*SCREEN_HEIGHT / 8 );
 			stateRateTextTexture.render( 3 * SCREEN_WIDTH / 4, 3*SCREEN_HEIGHT / 8 );
-			fedRateTextTexture.render( 3 * SCREEN_WIDTH / 4,  5 *SCREEN_HEIGHT / 8 );
-			fedRatePromptTextTexture.render( SCREEN_WIDTH / 2,  5 *SCREEN_HEIGHT / 8 );
+			fedRateTextTexture.render( 3 * SCREEN_WIDTH / 2,  5 *SCREEN_HEIGHT / 8 );
+			fedRatePromptTextTexture.render( SCREEN_WIDTH / 4,  5 *SCREEN_HEIGHT / 8 );
 			netIncomePromptTextTexture.render( SCREEN_WIDTH / 2,  7 * SCREEN_HEIGHT / 8 );
 			netIncomeTextTexture.render( 3 * SCREEN_WIDTH / 4,  7 * SCREEN_HEIGHT / 8 );
 		}

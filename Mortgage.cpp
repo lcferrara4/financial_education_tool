@@ -72,10 +72,10 @@ void Mortgage::writeToFile(){
 
         ofstream myFile; 
         myFile.open("loanInfo.txt"); 
-        myFile<<"MONTH\tINTEREST BALANCE"<<endl; 
+        myFile<<"MONTH     INTEREST     BALANCE"<<endl; 
 	for(int i=0; i<table.size(); i++){
                 for(int j=0; j<table[i].size(); j++){
-                        myFile<<table[i][j]<<'\t';
+                        myFile<<table[i][j]<<"          ";
                 }
                 myFile<<endl; 
         }

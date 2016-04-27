@@ -284,8 +284,8 @@ void Tax::writeToFile(){
     ofstream myFile; 
 
     myFile.open("taxInfo.txt"); 
-    myFile<<stateRate<<endl;
-    myFile<<fedRate<<endl; 
+    myFile<<stateRate*100<<"%"<<endl;
+    myFile<<fedRate*100<<"%"<<endl; 
     myFile<<netIncome<<endl; 
     myFile.close(); 
 

@@ -18,7 +18,8 @@ int main( int argc, char* args[]  ){
 		
         SDL mySDL;
         mySDL.handleEvents();
-
+}
+/*
 	//instantiate
 	default_random_engine generator(time(0));
 	vector<stock> stocks;
@@ -56,13 +57,15 @@ int main( int argc, char* args[]  ){
 		}
 		change++;
 	}
-/*
+
 	// displays the stocks
+	
+	for(int j=0;j<3;j++){
 	for(int i=0;i<60;i++){
 		stocks[i].recalc_price();
 		cout << stocks[i].get_stockName() << " " <<stocks[i].get_price() << ' ' <<endl;
 	}
-*/
+	}
 
 	// Make S&P 500
 	SP = makeSP(stocks);
@@ -112,3 +115,4 @@ double makeSP(vector<stock> s){
 	}
 	return total = total / 60;
 }
+*/
