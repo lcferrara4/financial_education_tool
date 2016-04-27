@@ -29,16 +29,16 @@ Welsh Family Hall
 Zahm Hall
 Notre Dame Stadium
 Main Building
-LaFortune Student Center
+LaFun
 DeBartolo Hall
-Mendoza College of Buiness
-DeBartolo Performing Arts Center
+Mendoza
+DPAC
 Stinson-Remick Hall
 Legends
 Morris Inn
 O'Shaughnessy Hall
-Cushing Hall of Engineering
-Fitspatrick Hall of Engeneering
+Cushing 
+Fitspatrick
 Hurley Hall
 Hayes-Healy Center
 South Dining Hall
@@ -48,11 +48,11 @@ Basilica
 Hesburgh Library
 Nieuwland Science
 Joyce Center
-Compton Family Ice Arena
-Loftus Sports Center
-Guglielmino Atheltics Complex
+Compton
+Loftus
+The Gug
 Jordan Hall of Science
-Rolfs Sports Recreation Center
+Rolfs
 Stepen Center
 Holy Cross House
 Bond Hall
