@@ -104,6 +104,9 @@ class SDL
 		LTexture stockPriceTextTexture;
 		LTexture priceTextTexture[60];
 		LTexture priceScreenTextTexture[60];
+		LTexture stocksScreenTextTexture[60];
+		LTexture yticsTextTexture[9];
+	
 
 		//Loan Screen Rendered Textures
 		LTexture loanScreenTextTexture;
@@ -122,7 +125,10 @@ class SDL
 		//Planner Screen Rendered Textures
 		LTexture plannerScreenTextTexture;
 
+
+		LTexture spaceTextTexture;
 		LTexture calcButtonTextTexture;
+
 
 		string state;
 		int income;
@@ -170,7 +176,7 @@ bool SDL::init()
 		}
 
 		//Create window
-		gWindow = SDL_CreateWindow( "SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
+		gWindow = SDL_CreateWindow( "Financial Education Tool", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
 		if( gWindow == NULL )
 		{
 			printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
@@ -239,7 +245,7 @@ bool SDL::loadMedia()
 		taxTextTexture.loadFromRenderedText( "Taxes", textColor );
                 loanTextTexture.loadFromRenderedText( "Loans", textColor );
                 stockTextTexture.loadFromRenderedText( "Stocks", textColor );
-                plannerTextTexture.loadFromRenderedText( "Planner", textColor );
+                plannerTextTexture.loadFromRenderedText( "Overview", textColor );
        }
 
         gFont = TTF_OpenFont( "fonts/cooper_light.ttf", 12 );
@@ -267,7 +273,13 @@ bool SDL::loadMedia()
 			price = convertToString( myUser.getStockPrice(i) );
 			priceScreenTextTexture[i].loadFromRenderedText( price, textColor );
 		}
-
+		int count = 0;
+		string y;
+                for( int i = 0; i <= 200; i+=25 ){
+			y = convertToString(i);
+                        yticsTextTexture[count].loadFromRenderedText( y, textColor );
+                	count++;
+		}
         }
 
 
@@ -287,7 +299,7 @@ bool SDL::loadMedia()
                 taxScreenTextTexture.loadFromRenderedText( "TAXES", textColor );
                 loanScreenTextTexture.loadFromRenderedText( "LOANS", textColor );
                 stockScreenTextTexture.loadFromRenderedText( "STOCKS", textColor );
-                plannerScreenTextTexture.loadFromRenderedText( "YOUR PLAN", textColor );
+                plannerScreenTextTexture.loadFromRenderedText( "FINANCIAL OVERVIEW", textColor );
                 spTextTexture.loadFromRenderedText( "ND 60", textColor );
 
 		ratePromptTextTexture.loadFromRenderedText( "Interest Rate:", textColor );
@@ -319,8 +331,20 @@ bool SDL::loadMedia()
                         totalTextTexture[i].loadFromRenderedText( "0", textColor);
 			total[i] = 0; 
                }
-                textColor = { 255, 0, 0 };
+                
+		ifstream inFile;
+                inFile.open ("stock_names.txt");
+
+                string word;
+                for( int i = 0; i < 60; i++ ){
+                        std::getline(inFile, word);
+                        stocksScreenTextTexture[i].loadFromRenderedText( word, textColor);
+                }
+
+
+	        textColor = { 255, 0, 0 };
 		transactionTextTexture.loadFromRenderedText("Press Enter for Transaction", textColor);
+		spaceTextTexture.loadFromRenderedText("Press Space to Increment Time", textColor);
 	}
 
 
@@ -362,6 +386,7 @@ void SDL::close()
         singleInputTextTexture.free();
 
 	calcButtonTextTexture.free();
+	spaceTextTexture.free();
 
 	stateRatePromptTextTexture.free();
 	fedRatePromptTextTexture.free();
@@ -381,6 +406,14 @@ void SDL::close()
 	for( int i = 0; i < 60; i++ ){
 		priceTextTexture[i].free();
 	}
+
+        for( int i = 0; i < 60; i++ ){
+                stocksScreenTextTexture[i].free();
+        }
+
+        for( int i = 0; i < 60; i++ ){
+                totalTextTexture[i].free();
+        }
 
 	spTextTexture.free();
 	buyTextTexture.free();
@@ -490,6 +523,7 @@ int SDL::handleEvents()
 				bool renderStateText = false;	
 				bool renderBuyText = false;
 				bool renderSellText = false;
+				bool renderScholText = false;
 
 				//Handle events on queue
 				while( SDL_PollEvent( &e ) != 0 )
@@ -546,8 +580,12 @@ int SDL::handleEvents()
                                                                         }
                                                                         else if( rateText.length() > 0 && y > 400 + ratePromptTextTexture.getHeight() && y < 435 + ratePromptTextTexture.getHeight() ){
                                                                         	rateText = rateText.substr(0, rateText.size() - 1);
-                                                                                renderRateText = true;
+                                                                               	renderRateText = true;
                                                                         }
+									else if( scholText.length() > 0 && y > 500 + scholPromptTextTexture.getHeight() && y < 535 + scholPromptTextTexture.getHeight() ){
+										scholText = scholText.substr(0, scholText.size() - 1);
+                                                                                renderScholText = true;
+									}
                                                                 }
 							}
 							else if( currentScreen >= 50 && currentScreen <=110 ){
@@ -588,6 +626,9 @@ int SDL::handleEvents()
                                                                         }
                                                                         else if( y > 400 + ratePromptTextTexture.getHeight() && y < 435 + ratePromptTextTexture.getHeight() ){
 										SDL_SetClipboardText( rateText.c_str() );
+                                                                        }
+                                                                        else if( scholText.length() > 0 && y > 500 + scholPromptTextTexture.getHeight() && y < 535 + scholPromptTextTexture.getHeight() ){
+										SDL_SetClipboardText( scholText.c_str() );
                                                                         }
                                                                 }
 	
@@ -632,6 +673,10 @@ int SDL::handleEvents()
                                                                         else if( y > 400 + ratePromptTextTexture.getHeight() && y < 435 + ratePromptTextTexture.getHeight() ){
                                                                         	rateText = SDL_GetClipboardText();
                                                                                 renderRateText = true;
+                                                                        }
+                                                                        else if( scholText.length() > 0 && y > 500 + scholPromptTextTexture.getHeight() && y < 535 + scholPromptTextTexture.getHeight() ){
+                                                                        	scholText = SDL_GetClipboardText();
+                                                                                renderScholText = true;
                                                                         }
 								}
 							}
@@ -683,6 +728,10 @@ int SDL::handleEvents()
 										rateText += e.text.text;
 										renderRateText = true;
 									}
+                                                                        else if( scholText.length() > 0 && y > 500 + scholPromptTextTexture.getHeight() && y < 535 + scholPromptTextTexture.getHeight() ){
+										scholText += e.text.text;
+                                                                                renderScholText = true;
+                                                                        }
 								}
 							}
                                                         else if( currentScreen >= 50 && currentScreen <=110 ){
@@ -762,6 +811,24 @@ int SDL::handleEvents()
                                         {
                                                 //Render space texture
                                                 monthInputTextTexture.loadFromRenderedText( " ", textColor );
+                                        }
+                                }
+
+                                //Rerender scholarship text if needed
+                                if( renderScholText )
+                                {
+                                        //Text is not empty 
+                                        if( scholText != "" )
+                                        {
+                                                scholarship = boost::lexical_cast<double>(scholText);
+                                                //Render new text
+                                                scholInputTextTexture.loadFromRenderedText( scholText.c_str(), textColor );
+                                        }
+                                        //Text is empty
+                                        else
+                                        {
+                                                //Render space texture
+                                                scholInputTextTexture.loadFromRenderedText( " ", textColor );
                                         }
                                 }
 
@@ -907,10 +974,13 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
 		myUser.setStatus(status);
 
 		taxScreenTextTexture.render( SCREEN_WIDTH / 2 - taxScreenTextTexture.getWidth() / 2 ,  0 );
-		
+
+		// Calculate Button		
 		SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0xFF );
                 SDL_Rect calcRect = { SCREEN_WIDTH / 4, 3 * SCREEN_HEIGHT / 8, 125, 70 };
                 SDL_RenderFillRect( gRenderer, &calcRect );
+                calcButtonTextTexture.render( ( SCREEN_WIDTH - calcButtonTextTexture.getWidth()) / 4 , 3 * SCREEN_HEIGHT / 8 + 5 );
+
 
 		// Input Rect
 		SDL_SetRenderDrawColor( gRenderer, 0x00, 0xFF, 0x00, 0xFF );
@@ -988,11 +1058,12 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
 	{
 		stockScreenTextTexture.render( SCREEN_WIDTH / 2 - stockScreenTextTexture.getWidth() / 2 ,  0 );
 
-		SDL_Rect spRect = { SCREEN_WIDTH / 2 - 100, 530, 200, 50 };
+		SDL_Rect spRect = { 3 * SCREEN_WIDTH / 4 - 100, 530, 300, 50 };
 		SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0xFF );
 		SDL_RenderFillRect( gRenderer, &spRect );
 
-		spTextTexture.render( SCREEN_WIDTH / 2 - stockScreenTextTexture.getWidth() / 2, 535);
+		spTextTexture.render( 3 * SCREEN_WIDTH / 4 - spTextTexture.getWidth() / 2, 535);
+		spaceTextTexture.render( (SCREEN_WIDTH - spaceTextTexture.getWidth() ) / 8, 535);
 
                 if( increment ){
 			increment = 0;
@@ -1007,6 +1078,8 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
 				price = convertToString( myUser.getStockPrice(i) );
 				priceScreenTextTexture[i].loadFromRenderedText( price, textColor );
 			}
+			
+			// show ND60 price !
 
 		}
 
@@ -1192,12 +1265,12 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
 	else if( currentScreen == 3 )
 	{
 		loanOutput = 0;
-//		output = 0;
 		myUser.setInterestRate(interestRate);
 		myUser.setPrinciple(principle);
 		myUser.setMonths(months);
 		myUser.setType(loanType);
-	
+		myUser.setScholarship(scholarship);	
+		
 		if( loanType == 0 ){
 			myUser.setScholarship(scholarship);
 		}
@@ -1206,8 +1279,9 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
 
 		//calculate button
                 SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0xFF );
-                SDL_Rect calcRect = { SCREEN_WIDTH / 4, 500, 125, 70 };
+                SDL_Rect calcRect = { SCREEN_WIDTH / 8, 500, 130, 70 };
                 SDL_RenderFillRect( gRenderer, &calcRect );
+                calcButtonTextTexture.render( ( SCREEN_WIDTH - calcButtonTextTexture.getWidth()) / 8 , 505 );
 
                 SDL_SetRenderDrawColor( gRenderer, 0x00, 0xFF, 0xFF, 0xFF );
                 SDL_Rect studRect = { ( SCREEN_WIDTH - mortInputTextTexture.getWidth() ) / 4 - 5, SCREEN_HEIGHT / 8 + newPromptTextTexture.getHeight(), 125, 35 };
@@ -1225,13 +1299,13 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
                 SDL_Rect rateRect = { ( SCREEN_WIDTH - princPromptTextTexture.getWidth() ) / 4 - 5, 400 + ratePromptTextTexture.getHeight(), 125, 35 };
                 SDL_RenderDrawRect( gRenderer, &rateRect );
 
-		SDL_Rect scholRect = { ( SCREEN_WIDTH - scholInputTextTexture.getWidth() ) / 4 - 5, 400 + scholPromptTextTexture.getHeight(), 125, 35 };
+		SDL_Rect scholRect = { ( SCREEN_WIDTH - scholInputTextTexture.getWidth() ) / 4 - 5, 500 + scholPromptTextTexture.getHeight(), 125, 35 };
 
 		if( loanType == 0 ){
 			SDL_RenderFillRect( gRenderer, &studRect );
 			SDL_RenderDrawRect( gRenderer, &scholRect );
-			scholPromptTextTexture.render( ( SCREEN_WIDTH - scholPromptTextTexture.getWidth() ) / 4, 400 );
-			scholInputTextTexture.render( ( SCREEN_WIDTH - scholInputTextTexture.getWidth() ) / 4, 400 + scholPromptTextTexture.getHeight() );
+			scholPromptTextTexture.render( ( SCREEN_WIDTH - scholPromptTextTexture.getWidth() ) / 4, 500 );
+			scholInputTextTexture.render( ( SCREEN_WIDTH - scholInputTextTexture.getWidth() ) / 4, 505 + scholPromptTextTexture.getHeight() );
 		}
 		else{
                 	SDL_RenderFillRect( gRenderer, &mortRect );
@@ -1245,34 +1319,65 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
                 		loanType = 1;
 			}
 		}
-
-		if( x > (SCREEN_WIDTH / 4) && x < SCREEN_WIDTH / 4 + 125 && y > 500 && y < 570){
+		if( x > (SCREEN_WIDTH / 8) && x < SCREEN_WIDTH / 8 + 130 && y > 500 && y < 570){
                         setLoanOutput();
 		}
 
 
                 if( loanOutput == 1 ){
-                        LTexture loanTableTextTexture[months+1];
+//                        LTexture loanTableTextTexture[months+1];
 
 		        ifstream inFile;
                         inFile.open ("loanInfo.txt");
 
                         SDL_Color textColor = { 255, 255, 255 };
 
+
+//  			Must change outputted filed to get rid of many spaces
+                 	if( months > 20 ){
+				gFont = TTF_OpenFont( "fonts/sans_serif_nb.ttf", 14 );
+			}
+ 			LTexture loanMonthsTextTexture[months+1];
+			LTexture loan2TextTexture[months + 1];
+			LTexture loan3TextTexture[months + 1];
+ 			
+			string word;
+			for( int i = 0; i < months + 1; i++ ){
+				inFile >> word;
+				loanMonthsTextTexture[i].loadFromRenderedText( word, textColor );
+				inFile >> word;
+				loan2TextTexture[i].loadFromRenderedText( word, textColor );
+				if( loanType ){ //mortgage type
+					inFile >> word;
+					loan3TextTexture[i].loadFromRenderedText( word, textColor );
+				}
+			}
+
+			if( months > 20){
+                		gFont = TTF_OpenFont( "fonts/sans_serif_nb.ttf", 28 );
+			}
+
+/*
                         string word;
 			for( int i = 0; i < months + 1; i++ ){
                         	std::getline(inFile, word);
                         	loanTableTextTexture[i].loadFromRenderedText( word, textColor );
 			}
-
+*/
 			// Amortization Table
 
 			for( int i = 0; i < months + 1; i++ ){
 
-                        	loanTableTextTexture[i].render( SCREEN_WIDTH / 2, 50 + (i * (SCREEN_HEIGHT - 50) / (months + 1)) );
+//	                      	loanTableTextTexture[i].render( SCREEN_WIDTH / 2, 50 + (i * (SCREEN_HEIGHT - 50) / (months + 1)) );
+				loanMonthsTextTexture[i].render( SCREEN_WIDTH / 2, 50 + (i * (SCREEN_HEIGHT - 50) / (months + 1)) );
+ 				loan2TextTexture[i].render( 5 * SCREEN_WIDTH / 8, 50 + (i * (SCREEN_HEIGHT - 50) / (months + 1)) );
+ 				if( loanType ){
+ 					loan3TextTexture[i].render( 6 * SCREEN_WIDTH / 8, 50 + (i * (SCREEN_HEIGHT - 50) / (months + 1)) );
+ 				}
 
 			}
-                }
+
+               }
 
 
 		//Render text textures
@@ -1299,9 +1404,7 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
 		buttonClick = 1;
         	SDL_Color textColor = { 255, 255, 255 };
 
-        	//gFont = TTF_OpenFont( "fonts/sans_serif_nb.ttf", 28 );
-		//stocksTextTexture[currentScreen-50].loadFromRenderedText( price, textColor );
-                stocksTextTexture[currentScreen-50].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
+                stocksScreenTextTexture[currentScreen-50].render( SCREEN_WIDTH / 2 - plannerScreenTextTexture.getWidth() / 2 , 0 );
 
                 SDL_Rect princRect = { ( SCREEN_WIDTH - princPromptTextTexture.getWidth() ) / 4 - 5, 200 + princPromptTextTexture.getHeight(), 125, 35 };
                 SDL_RenderDrawRect( gRenderer, &princRect );
@@ -1325,11 +1428,18 @@ int SDL::displayScreen( int currentScreen, int x, int y ){
 
 		priceTextTexture[currentScreen - 50].render( (SCREEN_WIDTH - priceTextTexture[currentScreen - 50].getWidth() ) / 4, 400 + stockPriceTextTexture.getHeight() );
 
-		transactionTextTexture.render( (SCREEN_WIDTH - transactionTextTexture.getWidth() ) / 4, 500 );
+		transactionTextTexture.render( (SCREEN_WIDTH - transactionTextTexture.getWidth() ) / 8, 500 );
+		spaceTextTexture.render( (SCREEN_WIDTH - spaceTextTexture.getWidth() ) / 8, 500 + transactionTextTexture.getHeight() );
 
 		//Draw plot
 		SDL_RenderDrawLine( gRenderer, SCREEN_WIDTH / 2, 7 * SCREEN_HEIGHT / 8, SCREEN_WIDTH - 100, 7 * SCREEN_HEIGHT / 8 );
                 SDL_RenderDrawLine( gRenderer, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 8, SCREEN_WIDTH / 2, 7 * SCREEN_HEIGHT / 8 );
+		int y = 0;
+		for( int i = 0; i <= 200; i += 25 ){
+			SDL_RenderDrawLine( gRenderer, SCREEN_WIDTH / 2 - 5, int(525 - 2.25*i), SCREEN_WIDTH / 2 + 5, int(525 - 2.25*i) );
+			yticsTextTexture[y].render( SCREEN_WIDTH / 2 - 10, int(525 - 2.25*i) );
+			y++;
+		}
 
                 if( enter ){
 			enter = 0;
