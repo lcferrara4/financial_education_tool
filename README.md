@@ -41,5 +41,6 @@ Financial Education Tool: User-Guide
         When entering numerical values only digits 0-9 can be used (no letters).  This is because SDL takes in the input as a string and the program converts it to a double to to calculations on.  The program will not be able to convert a non 0-9 character into a double.  
         The user must enter the exact name of the state (capitalized and no spaces) when entering tax information.  
         Our loan plans assume a loan time of around 2-3 years (24 - 36 months).  Any longer will be calculated correctly, the table will just be somewhat hard to read as it needs to be resized to fit the window.  
+        We assume that the user will enter valid amounts for each input box (i.e. cannot spend over income or have a negative income).  This would be simple to implement we just did not have enough time.  
 
      
